@@ -1,0 +1,44 @@
+#!/bin/bash
+
+RESTART_FILE="restart.flag"
+
+# Create directory if it doesn't exist
+mkdir -p data/logs
+
+# Define log file
+LOG_FILE="data/logs/SYSTEM_RESTART.log"
+
+touch $LOG_FILE
+
+while true; do
+    if [ -f "server.pid" ]; then
+        SERVER_PID=$(cat server.pid)
+
+        # Check if the RESTART_FILE exists
+        if [ -f "$RESTART_FILE" ]; then
+            echo "Server restart detected." >> $LOG_FILE
+            rm -f "$RESTART_FILE"
+
+            # Send SIGTERM to the server process and wait for it to terminate
+            kill -15 $SERVER_PID
+            echo "SIGTERM sent to server (PID: $SERVER_PID)." >> $LOG_FILE
+            sleep 5  # Wait for clean shutdown
+
+            # If the process is still running, send SIGKILL as a last resort
+            if ps -p $SERVER_PID > /dev/null; then
+                echo "Process did not terminate. Forcing shutdown." >> $LOG_FILE
+                kill -9 $SERVER_PID
+            fi
+
+            # Restart the server and redirect output to main.log
+            echo "Restarting server..." >> $LOG_FILE
+            python app.py
+            NEW_SERVER_PID=$!
+            echo $NEW_SERVER_PID > server.pid
+            echo "Server restarted with PID: $NEW_SERVER_PID." >> $LOG_FILE
+        fi
+    fi
+
+    # Sleep until a restart is triggered
+    sleep 2
+done

@@ -1,0 +1,32 @@
+#!/bin/bash
+
+#set -o errexit
+#set -o pipefail
+#set -o nounset
+
+# Prüfe, ob eine .env-Datei vorhanden ist und lade die Umgebungsvariablen
+#if [ -f .env ]; then
+#  export $(grep -v '^#' .env | grep '=' | xargs)
+#else
+#  echo "No .env file found"
+#fi
+
+
+# server.pid datei löschen falls existiert
+if [ -f "server.pid" ]; then
+  rm -f "server.pid"
+fi
+
+## Setzen des SECRET_KEY, falls nicht vorhanden
+#: "${SECRET_KEY:=$(openssl rand -base64 32)}"
+#export SECRET_KEY
+#echo "SECRET_KEY gesetzt: ${SECRET_KEY}"
+#
+
+# Aktiviere die virtuelle Umgebung
+source /venv/bin/activate
+
+/restart_server &
+
+# Führe den angegebenen Befehl aus (hier python3 app.py)
+exec "$@"

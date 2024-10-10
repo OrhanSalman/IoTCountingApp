@@ -1,0 +1,61 @@
+version: "3.8"
+
+volumes:
+  mongo_data:
+  mongo_config:
+
+services:
+  redis:
+    env_file:
+      - path: sample.env
+    image: ${REDIS_IMAGE}
+    container_name: redis
+    restart: unless-stopped
+    command: --bind 0.0.0.0 --port ${REDIS_PORT}
+    networks:
+      - monitoring
+    environment:
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=§{REDIS_PORT}
+    ports:
+      - "${REDIS_PORT}:${REDIS_PORT}"
+
+  mongodb:
+    image: ${MONGODB_IMAGE}
+    env_file:
+      - path: sample.env
+    container_name: mongodb
+    restart: unless-stopped
+    #environment:
+    #  MONGO_INITDB_DATABASE: iot
+    #  MONGO_INITDB_ROOT_USERNAME:
+    #  MONGO_INITDB_ROOT_PASSWORD:
+    volumes:
+      - mongo_data:/data/db
+      - mongo_config:/data/configdb
+    networks:
+      - monitoring
+    ports:
+      - "${MONGO_PORT}:${MONGO_PORT}"
+
+  ## If you want to use a web UI for MongoDB, you can use mongo-express
+  #mongo_express:
+  #  image: mongo-express
+  #  env_file:
+  #    - path: sample.env
+  #  container_name: mongo_express
+  #  restart: unless-stopped
+  #  depends_on:
+  #    - mongodb
+  #  environment:
+  #    ME_CONFIG_MONGODB_SERVER: mongodb
+  #    ME_CONFIG_BASICAUTH_USERNAME: admin
+  #    ME_CONFIG_BASICAUTH_PASSWORD: secret
+  #  ports:
+  #    - "8081:8081"
+  #  networks:
+  #    - monitoring
+
+networks:
+  monitoring:
+    driver: bridge
