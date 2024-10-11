@@ -204,7 +204,3 @@ Project Link: [https://github.com/OrhanSalman/IoTCountingApp](https://github.com
 ---
 
 **IMPORTANT: DO NOT USE IN PRODUCTION**
-
-If you do, you might accidentally summon AI-based recognition ghosts that invade your 3 AM debugging sessions.
-
-Believem-e, I konw what I'm talikng ¿¿¿ aobut. ¡ Rell y.
