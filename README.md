@@ -193,6 +193,7 @@ Project Link: [https://github.com/OrhanSalman/IoTCountingApp](https://github.com
 - TPU compatibility
 - Not export model if already exists
 - Zoom / Crop Regions for less Points to calculate
+- Persitent Volumes
 
 ###### CODE
 
