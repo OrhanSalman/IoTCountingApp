@@ -20,11 +20,9 @@ const CustomFooter = () => {
         alignItems: "center",
       }}
     >
-      <div style={{ flexGrow: 1, textAlign: "center" }}>
-        IoT Counting App © Sal-Winfo-Thesis 2024
-      </div>
+      <div style={{ flexGrow: 1, textAlign: "center" }}> </div>
       <div style={{ display: "flex", alignItems: "center" }}>
-        <span style={{ marginRight: "12px" }}>Version 0.1.0</span>
+        <span style={{ marginRight: "12px" }}>Version </span>
         <GithubOutlined style={{ fontSize: "24px", marginLeft: "8px" }} />
       </div>
     </Footer>

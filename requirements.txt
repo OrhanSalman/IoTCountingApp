@@ -3,6 +3,8 @@ h5py==3.12.1
 python-dotenv==1.0.1
 opencv-python-headless==4.10.0.84
 jsonschema==4.23.0
+setuptools==75.2.0
+wheel
 
 yt_dlp
 pafy

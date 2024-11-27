@@ -7,7 +7,7 @@ volumes:
 services:
   redis:
     env_file:
-      - path: sample.env
+      - path: .env
     image: ${REDIS_IMAGE}
     container_name: redis
     restart: unless-stopped
@@ -23,7 +23,7 @@ services:
   mongodb:
     image: ${MONGODB_IMAGE}
     env_file:
-      - path: sample.env
+      - path: .env
     container_name: mongodb
     restart: unless-stopped
     #environment:
@@ -42,7 +42,7 @@ services:
   #mongo_express:
   #  image: mongo-express
   #  env_file:
-  #    - path: sample.env
+  #    - path: .env
   #  container_name: mongo_express
   #  restart: unless-stopped
   #  depends_on:

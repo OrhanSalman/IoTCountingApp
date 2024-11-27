@@ -1,6 +1,7 @@
 import React from "react";
 import { notification } from "antd";
 
+// TODO: Pausiert
 const NotificationComponent = (
   msg,
   desc,

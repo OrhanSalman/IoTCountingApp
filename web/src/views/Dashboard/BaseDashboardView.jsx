@@ -175,26 +175,28 @@ const BaseDashboardView = () => {
   }, [health]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      fetch(`${baseUrl}api/inference/frame`)
-        .then((response) => {
-          if (!response.ok) {
-            return null;
-          }
-          return response.blob();
-        })
-        .then((blob) => {
-          const imageUrl = URL.createObjectURL(blob);
-          setFrame(imageUrl);
-          localStorage.setItem("lastFrame", imageUrl);
-        })
-        .catch((error) => {
-          console.error("Fetch error:", error);
-        });
-    }, 20000);
+    if (health?.inference?.status) {
+      const interval = setInterval(() => {
+        fetch(`${baseUrl}api/inference/frame`)
+          .then((response) => {
+            if (!response.ok) {
+              return null;
+            }
+            return response.blob();
+          })
+          .then((blob) => {
+            const imageUrl = URL.createObjectURL(blob);
+            setFrame(imageUrl);
+            localStorage.setItem("lastFrame", imageUrl);
+          })
+          .catch((error) => {
+            console.error("Fetch error:", error);
+          });
+      }, 5000);
 
-    return () => clearInterval(interval);
-  }, []);
+      return () => clearInterval(interval);
+    }
+  }, [health?.inference?.status]);
 
   useEffect(() => {
     const savedFrame = localStorage.getItem("lastFrame");
@@ -220,7 +222,6 @@ const BaseDashboardView = () => {
   const cam_fps = health?.camera?.details?.fps || 0;
   const inference_status = health?.inference?.status || false;
 
-  // TODO: nicht auf config_fps, sondern auf die kamera fps prüfen
   let alertMessage = "";
   let alertDescription = "";
   let alertType = "success";
@@ -259,7 +260,6 @@ const BaseDashboardView = () => {
     <>
       <div style={{ width: "100%", padding: "12px", margin: "0 auto" }}>
         <Row gutter={16} style={{ marginTop: 16 }}>
-          {/* Linke Kolonne */}
           <Col xs={24} sm={24} md={12} lg={12} style={{ marginBottom: 16 }}>
             <Card
               size="small"
@@ -349,9 +349,23 @@ const BaseDashboardView = () => {
                 </Row>
               </Card>
             </Card>
+
+            <Card
+              size="small"
+              title="Zusätzliche Metriken"
+              style={{ marginTop: 16 }}
+            >
+              <p>
+                Inferenz aktiv seit:{" "}
+                {health?.inference?.details?.init_time || "--.--.----"}
+              </p>
+              <p>Warteschlange: {health?.inference?.queue_size}</p>
+              {/*<p>2.1. Anzahl gezählter Objekte</p>*/}
+              {/*<p>2.2. Zeiten durchschnittlich</p>*/}
+              {/*<p>2.3. Routen</p>*/}
+            </Card>
           </Col>
 
-          {/* Rechte Kolonne */}
           <Col xs={24} sm={24} md={12} lg={12}>
             <Card
               size="small"
@@ -511,8 +525,6 @@ const BaseDashboardView = () => {
                 </Row>
               </Card>
 
-              {/* GPU */}
-
               {health?.gpu && health.gpu.length > 0 && (
                 <Card
                   size="small"
@@ -596,7 +608,6 @@ const BaseDashboardView = () => {
                 </Card>
               )}
 
-              {/* VRAM */}
               {health?.gpu && health.gpu.length > 0 && (
                 <Card
                   size="small"
@@ -658,23 +669,27 @@ const BaseDashboardView = () => {
                 </Card>
               )}
             </Card>
+
+            {frame && (
+              <Card
+                size="small"
+                title="Vorschau"
+                style={{
+                  width: "100%",
+                  marginBottom: 16,
+                }}
+              >
+                <Image
+                  src={frame}
+                  style={{
+                    height: "auto",
+                  }}
+                />
+              </Card>
+            )}
           </Col>
         </Row>
 
-        <Row gutter={16} style={{ marginTop: 16 }}>
-          <Card size="small" title="Vorschaubild" style={{ marginBottom: 16 }}>
-            <Image src={frame} style={{ height: "auto" }} />
-          </Card>
-        </Row>
-        <Card
-          size="small"
-          title="Zusätzliche Metriken"
-          style={{ marginTop: 16 }}
-        >
-          <p>2.1. Anzahl gezählter Objekte</p>
-          <p>2.2. Zeiten durchschnittlich</p>
-          <p>2.3. Routen</p>
-        </Card>
         <Outlet />
       </div>
     </>

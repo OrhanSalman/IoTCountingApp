@@ -182,7 +182,8 @@ const SectionVideo = () => {
                 title: "Quellauflösung",
                 options: formats,
                 width: "160px",
-                onChange: handleUpdateStreamUrlResolution,
+                default: formats[formats.length - 1]?.value,
+                onChange: handleUpdateStreamUrlResolution, // TODO: ungenutzt?
                 value: formats.find(
                   (format) =>
                     format.value === deviceConfigs[0]?.stream_url_resolution

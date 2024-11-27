@@ -86,67 +86,43 @@ def whereModel(weights, int8, quantization, format):
 
     return model_str
 
-    
-def randomName():
-    names = [
-        "Orion Alpha",
-        "Nova Prime",
-        "Quantum Z5",
-        "Astra Echo",
-        "Vega Pro",
-        "Lumen XT",
-        "Nebula 200",
-        "Zeta Core",
-        "Apollo X7",
-        "Solstice 500",
-        "Taurus M4",
-        "Zenith Omega",
-        "Polaris Lite",
-        "Helios Wave",
-        "Draco Flex",
-        "Cosmos Max",
-        "Phoenix Delta",
-        "Artemis Ultra",
-        "Lynx Vector",
-        "Titan Surge",
-        "Hyperion Pulse",
-        "Eclipse X3",
-        "Atlas G7",
-        "Stellar Fusion",
-        "Mercury Blade",
-        "Zephyr Quantum",
-        "Griffin Axis",
-        "Nebula Spark",
-        "Stratus Edge",
-        "Chronos Pro",
-        "Pegasus Volt",
-        "Gladius Core",
-        "Aurora Wave",
-        "Cetus Prime",
-        "Cygnus Flux",
-        "Aether Blaze",
-        "Icarus Lite",
-        "Vortex Ultra",
-        "Falcon Zenith",
-        "Argon X9",
-        "Oberon Pulse",
-        "Helix Nova",
-        "Mirage Flex",
-        "Altair Pro",
-        "Raven Optic",
-        "Pulsar X2",
-        "Hydra Prime",
-        "Vega Sync",
-        "Phoenix Vector",
-        "Orion Pulse",
-        "Nova Spark",
-        "Quantum Blade",
-        "Astra Pro",
-        "Vega Wave",
-        "Lumen Core",
-        "Nebula Ultra",
-        "Zeta Flex",
-        "Apollo Omega",
-    ]
+def save_to_json(data, path):
+    with open(path, "w") as file:
+        json.dump(data, file, indent=4)
+    print(f"Data saved to {path}")
+        
 
-    return names[random.randint(0, len(names) - 1)]
+def add_session(session, path):
+    with open(path, "r") as file:
+        session_counter = json.load(file)
+
+    session_counter["counter"] += 1
+    session_counter["sessions"].append(session)
+
+    with open(path, "w") as file:
+        json.dump(session_counter, file, indent=4)
+
+def add_end_datetime_to_session(session_id, end_datetime, path):
+    with open(path, "r") as file:
+        session_counter = json.load(file)
+        
+    for session in session_counter["sessions"]:
+        if session["id"] == session_id:
+            session["end"] = end_datetime
+            
+    with open(path, "w") as file:
+        json.dump(session_counter, file, indent=4)
+
+
+def delete_session(session_id, path):
+    # Öffne die JSON-Datei im Lese-Modus
+    with open(path, "r") as file:
+        session_counter = json.load(file)
+        
+    # Entferne die Sitzung mit der angegebenen ID
+    session_counter["sessions"] = [session for session in session_counter["sessions"] if session["id"] != session_id]
+    
+    # Öffne die JSON-Datei im Schreib-Modus, um die Änderungen zu speichern
+    with open(path, "w") as file:
+        json.dump(session_counter, file, indent=4)  # Speichere die aktualisierten Daten
+        

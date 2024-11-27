@@ -1,12 +1,10 @@
 import settings, os, json
-from src.utils.messyFunctions import generateUUID, randomName
+from src.utils.messyFunctions import generateUUID
 
 id = generateUUID()
 
 config_data = {
     "id": id,
-    "deviceName": settings.DEVICE_NAME if settings.DEVICE_NAME is not None else randomName(),
-    "deviceLocation": settings.DEVICE_LOCATION if settings.DEVICE_LOCATION is not None else "Unknown",
     "deviceConfigs": [
         {
             "id": generateUUID(),
@@ -56,7 +54,7 @@ def generateDefaultConfigIfNotExists():
 
 
 system_settings_data = {
-    "automatic_update": False,
+    "device_id": id,
     "auto_start_inference": False,
     "auto_start_mongo_client": False,
     "auto_start_mqtt_client": False,
@@ -69,10 +67,8 @@ system_settings_data = {
     "blur_humans": True,
     "max_tracking_points_length": 25,
     "save_counts_to_mongo": False,
-    "save_counts_to_queue_if_mongo_down": True, # TODO
-    "ensure_not_data_loss_to_file": False,
     "daily_cleanup_time": "00:00",
-    "mqtt_max_publish_limit": 100,
+    "mqtt_max_publish_limit": 100, # TODO:
 }
 
 def generateDefaultSystemSettingsIfNotExists():

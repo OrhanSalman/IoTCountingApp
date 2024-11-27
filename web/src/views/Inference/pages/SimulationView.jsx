@@ -48,16 +48,16 @@ const SimulationView = () => {
     resolution: null,
     fps: null,
   });
-  const [blurHumans, setBlurHumans] = useState(true);
+  //const [blurHumans, setBlurHumans] = useState(true);
   const [visibleDrawer, setVisibleDrawer] = useState(false);
   const [selectedSimulation, setSelectedSimulation] = useState(null);
 
   useEffect(() => {
     const fetchSystemSettings = async () => {
       const systemSettings = await getSystemSettings();
-      if (systemSettings) {
-        setBlurHumans(systemSettings?.blur_humans);
-      }
+      //if (systemSettings) {
+      //  setBlurHumans(systemSettings?.blur_humans);
+      //}
     };
 
     fetchSystemSettings();
@@ -189,7 +189,7 @@ const SimulationView = () => {
     runCommand("start", "counting", {
       only_simulation: true,
       only_simulation_img: false,
-      blur_humans: blurHumans,
+      //blur_humans: blurHumans,
     });
     await fetchHealth();
   };

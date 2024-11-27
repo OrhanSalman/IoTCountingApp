@@ -7,34 +7,33 @@ import React, {
 } from "react";
 import { message } from "antd";
 import errorHandler from "./utils/errorHandler";
-import {
-  getSessionStorage,
-  setSessionStorage,
-  removeSessionStorage,
-} from "../helper/sessionStorage";
+
 import baseURL from "./baseUrl";
 
 export const DeviceContext = createContext();
 
 const initialState = {
   data: [],
-  counts: {},
+  counts: [],
+  tracking: [],
+  times: [],
   user: {},
   originalData: [],
   isModified: false,
   isCamModified: false,
-  loadedFromSession: false,
   image: null,
   logs: [],
   health: {},
   benchmarks: [],
   simulations: [],
   simulation_images: [],
+  sessions: [],
   loading: false,
   loadingLogs: false,
   error: null,
 };
 
+// TODO: brauche ich das noch?
 const updateNestedObject = (obj, path, value) => {
   if (path.length === 0) return value;
   const [head, ...rest] = path;
@@ -57,7 +56,6 @@ const updateNestedObject = (obj, path, value) => {
   };
 };
 
-// TODO: sehr redundant, sollte vereinfacht werden
 function reducer(state, action) {
   switch (action.type) {
     case "FETCH_INIT":
@@ -91,23 +89,11 @@ function reducer(state, action) {
 
     // HEALTH
     case "FETCH_HEALTH_INIT":
-      return {
-        ...state,
-        loading: false,
-        error: null,
-      };
+      return { ...state, loading: false, error: null };
     case "FETCH_HEALTH_SUCCESS":
-      return {
-        ...state,
-        loading: false,
-        health: action.payload,
-      };
+      return { ...state, loading: false, health: action.payload }; // TODO: in allen success error
     case "FETCH_HEALTH_FAILURE":
-      return {
-        ...state,
-        loading: false,
-        error: action.error,
-      };
+      return { ...state, loading: false, error: action.error };
 
     // BENCHMARKS
     case "FETCH_BENCHMARKS_INIT":
@@ -134,11 +120,34 @@ function reducer(state, action) {
       return { ...state, loading: false, error: action.error };
 
     // COUNTS
-    case "FETCH_COUNTS_INIT":
+    case "FETCH_COUNTSDATA_INIT":
       return { ...state, loading: true, error: null };
-    case "FETCH_COUNTS_SUCCESS":
+    case "FETCH_COUNTSDATA_SUCCESS":
       return { ...state, loading: false, counts: action.payload };
-    case "FETCH_COUNTS_FAILURE":
+    case "FETCH_COUNTSDATA_FAILURE":
+      return { ...state, loading: false, error: action.error };
+
+    // TRACKING
+    case "FETCH_TRACKINGDATA_INIT":
+      return { ...state, loading: true, error: null };
+    case "FETCH_TRACKINGDATA_SUCCESS":
+      return { ...state, loading: false, tracking: action.payload };
+    case "FETCH_TRACKINGDATA_FAILURE":
+      return { ...state, loading: false, error: action.error };
+
+    // TIMES
+    case "FETCH_TIMESDATA_INIT":
+      return { ...state, loading: true, error: null };
+    case "FETCH_TIMESDATA_SUCCESS":
+      return { ...state, loading: false, times: action.payload };
+    case "FETCH_TIMESDATA_FAILURE":
+      return { ...state, loading: false, error: action.error };
+
+    case "FETCH_SESSIONSDATA_INIT":
+      return { ...state, loading: true, error: null };
+    case "FETCH_SESSIONSDATA_SUCCESS":
+      return { ...state, loading: false, sessions: action.payload };
+    case "FETCH_SESSIONSDATA_FAILURE":
       return { ...state, loading: false, error: action.error };
 
     // UPDATE CONFIG
@@ -171,7 +180,6 @@ function reducer(state, action) {
         loading: false,
         isModified: true,
       };
-      setSessionStorage(`device_${action.deviceId}`, updatedState.data);
       return updatedState;
 
     case "LOCAL_UPDATE_DEVICE_TAGS":
@@ -187,38 +195,8 @@ function reducer(state, action) {
         loading: false,
       };
 
-      setSessionStorage(`device_${action.deviceId}`, newDeviceTagsState.data);
       return newDeviceTagsState;
 
-    // SESSION STORAGE
-    case "LOAD_FROM_SESSION_STORAGE":
-      const sessionData = getSessionStorage(`device_${action.deviceId}`);
-      return {
-        ...state,
-        data: sessionData || state.data,
-        isModified: !!sessionData,
-        loadedFromSession: !!sessionData,
-      };
-    case "LOAD_FROM_SESSION_STORAGE_SUCCESS":
-      return {
-        ...state,
-        data: action.payload,
-        benchmarks: action.payload.benchmarks,
-        health: action.payload.health,
-        logs: action.payload.logs,
-        image: action.payload.image,
-        isModified: true,
-        error: null,
-        loadedFromSession: true,
-      };
-    case "LOAD_FROM_SESSION_STORAGE_FAILURE":
-      return { ...state, error: action.error, loadedFromSession: false };
-    case "SAVE_TO_SESSION_STORAGE":
-      setSessionStorage(`device_${action.deviceId}`, state.data);
-      return state;
-    case "REMOVE_FROM_SESSION_STORAGE":
-      removeSessionStorage(`device_${action.deviceId}`);
-      return state;
     default:
       throw new Error(`Unhandled action type: ${action.type}`);
   }
@@ -230,7 +208,7 @@ export const DeviceProvider = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
   //const [cookies] = useCookies([]);
 
-  const fetchData = useCallback(async () => {
+  const fetchConfig = useCallback(async () => {
     dispatch({ type: "FETCH_INIT" });
     try {
       const response = await fetch(`${baseURL}api/config`, {
@@ -246,10 +224,6 @@ export const DeviceProvider = ({ children }) => {
         const data = await response.json();
         deviceIdRef.current = data.id;
         dispatch({ type: "FETCH_SUCCESS", payload: data });
-        dispatch({
-          type: "REMOVE_FROM_SESSION_STORAGE",
-          deviceId: deviceIdRef.current,
-        });
       } else {
         dispatch({
           type: "FETCH_FAILURE",
@@ -264,6 +238,7 @@ export const DeviceProvider = ({ children }) => {
       errorHandler(status, statusText);
     }
   }, []);
+
   const fetchImage = useCallback(async (snap = false) => {
     dispatch({ type: "FETCH_IMAGE_INIT" });
 
@@ -349,8 +324,12 @@ export const DeviceProvider = ({ children }) => {
       });
 
       if (response.ok) {
-        const health = await response.json();
-        dispatch({ type: "FETCH_HEALTH_SUCCESS", payload: health });
+        const healthData = await response.json();
+        // TODO: Siehe useEffect TODO. Dispatch nur, wenn sich die Daten geändert haben
+        if (JSON.stringify(healthData) !== JSON.stringify(state.health)) {
+          dispatch({ type: "FETCH_HEALTH_SUCCESS", payload: healthData });
+        }
+        //dispatch({ type: "FETCH_HEALTH_SUCCESS", payload: health });
       } else {
         dispatch({
           type: "FETCH_HEALTH_FAILURE",
@@ -450,65 +429,12 @@ export const DeviceProvider = ({ children }) => {
     }
   }, []);
 
-  /*
-  const fetchSimulationImages = useCallback(async () => {
-
-
-    dispatch({ type: "FETCH_SIMULATION_IMAGES_INIT" });
-
-    try {
-      const response = await fetch(`${baseURL}api/simulation_images`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "authorization": `Bearer ${cookies.access_token}`,
-        },
-        credentials: "include",
-      });
-
-      if (response.ok) {
-        const simulation_images = await response.json();
-        dispatch({
-          type: "FETCH_SIMULATION_IMAGES_SUCCESS",
-          payload: simulation_images,
-        });
-      } else {
-        dispatch({
-          type: "FETCH_SIMULATION_IMAGES_FAILURE",
-          error: `${response.status} ${response.statusText}`,
-        });
-        errorHandler(response.status, response.statusText);
-      }
-    } catch (error) {
-      const status = error?.status || "Unbekannt";
-      const statusText = error?.statusText || "Unbekannter Fehler";
-      dispatch({
-        type: "FETCH_SIMULATION_IMAGES_FAILURE",
-        error: statusText,
-      });
-      errorHandler(status, statusText);
-    }
-  }, []);
-*/
-
-  const fetchCounts = useCallback(async (date, startTime, endTime) => {
-    if (!date) {
-      date = new Date().toISOString().split("T")[0];
-    }
-
-    if (!startTime) {
-      startTime = "00-00-00";
-    }
-
-    if (!endTime) {
-      endTime = "23-59-59";
-    }
-
-    dispatch({ type: "FETCH_COUNTS_INIT" });
+  const fetchData = useCallback(async (type, session_id) => {
+    dispatch({ type: `FETCH_${type.toUpperCase()}DATA_INIT` });
 
     try {
       const response = await fetch(
-        `${baseURL}api/counts?date=${date}&startTime=${startTime}&endTime=${endTime}`,
+        `${baseURL}api/data?type=${type}&session_id=${session_id}`,
         {
           method: "GET",
           headers: {
@@ -519,11 +445,16 @@ export const DeviceProvider = ({ children }) => {
       );
 
       if (response.ok) {
-        const counts = await response.json();
-        dispatch({ type: "FETCH_COUNTS_SUCCESS", payload: counts });
+        const data = await response.json();
+        if (type === "tracking") {
+        }
+        dispatch({
+          type: `FETCH_${type.toUpperCase()}DATA_SUCCESS`,
+          payload: data,
+        });
       } else {
         dispatch({
-          type: "FETCH_COUNTS_FAILURE",
+          type: `FETCH_${type.toUpperCase()}DATA_FAILURE`,
           error: `${response.status} ${response.statusText}`,
         });
       }
@@ -531,7 +462,41 @@ export const DeviceProvider = ({ children }) => {
       const status = error?.status || "Unbekannt";
       const statusText = error?.statusText || "Unbekannter Fehler";
       dispatch({
-        type: "FETCH_COUNTS_FAILURE",
+        type: `FETCH_${type.toUpperCase()}DATA_FAILURE`,
+        error: statusText,
+      });
+      errorHandler(status, statusText);
+    }
+  }, []);
+
+  const fetchSessionData = useCallback(async () => {
+    dispatch({ type: "FETCH_SESSIONSDATA_INIT" });
+
+    try {
+      const response = await fetch(`${baseURL}api/sessions`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          //authorization: `Bearer ${cookies.access_token}`,
+        },
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        const sessions = await response.json();
+        dispatch({ type: "FETCH_SESSIONSDATA_SUCCESS", payload: sessions });
+      } else {
+        dispatch({
+          type: "FETCH_SESSIONSDATA_FAILURE",
+          error: `${response.status} ${response.statusText}`,
+        });
+        errorHandler(response.status, response.statusText);
+      }
+    } catch (error) {
+      const status = error?.status || "Unbekannt";
+      const statusText = error?.statusText || "Unbekannter Fehler";
+      dispatch({
+        type: "FETCH_SESSIONSDATA_FAILURE",
         error: statusText,
       });
       errorHandler(status, statusText);
@@ -555,18 +520,14 @@ export const DeviceProvider = ({ children }) => {
       if (response.ok) {
         dispatch({ type: "UPDATE_CONFIG_SUCCESS", payload: state.data });
         message.success("Konfiguration erfolgreich gespeichert");
-        dispatch({
-          type: "REMOVE_FROM_SESSION_STORAGE",
-          deviceId: deviceIdRef.current,
-        });
         return response;
       } else {
-        const errorText = await response.text(); // Fehler als Text parsen
+        const errorText = await response.text();
         dispatch({
           type: "UPDATE_CONFIG_FAILURE",
           error: `${response.status} ${errorText}`,
         });
-        errorHandler(response.status, errorText); // Den Text anzeigen
+        errorHandler(response.status, errorText);
         return response;
       }
     } catch (error) {
@@ -612,41 +573,29 @@ export const DeviceProvider = ({ children }) => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        // Check if the data is already in the session storage
-        const sessionData = getSessionStorage(`device_${deviceIdRef.current}`);
-        if (sessionData) {
-          // Load data from session storage if available
-          dispatch({
-            type: "LOAD_FROM_SESSION_STORAGE_SUCCESS",
-            payload: sessionData,
-          });
-
-          // Fetch the image (and any other tasks that always need to run)
-          await Promise.all([fetchImage()]);
-        } else {
-          // Fetch data and the image if session storage is empty
-          await Promise.all([
-            fetchData(),
-            fetchImage(),
-            fetchUserData(),
-            fetchHealth(),
-            fetchBenchmarks(),
-            fetchSimulations("simvid"),
-            fetchSimulations("simimg"),
-            //fetchSimulationImages(),
-            fetchCounts(),
-            fetchLogs(),
-          ]);
-        }
+        await Promise.all([
+          fetchConfig(),
+          fetchImage(),
+          fetchUserData(),
+          fetchHealth(),
+          fetchBenchmarks(),
+          fetchSimulations("simvid"),
+          fetchSimulations("simimg"),
+          //fetchSimulationImages(),
+          //fetchData("counts"),
+          //fetchData("tracking"),
+          //fetchData("times"),
+          fetchLogs(),
+          fetchSessionData(),
+        ]);
       } catch (error) {
-        dispatch({ type: "LOAD_FROM_SESSION_STORAGE_FAILURE", error });
         errorHandler(error.status, error.statusText);
       }
     };
 
     loadData();
   }, [
-    fetchData,
+    fetchConfig,
     fetchImage,
     fetchLogs,
     fetchUserData,
@@ -654,40 +603,38 @@ export const DeviceProvider = ({ children }) => {
     fetchSimulations,
     //fetchSimulationImages,
     fetchBenchmarks,
-    fetchCounts,
+    fetchData,
+    fetchSessionData,
   ]);
 
+  /* 
+    Dieses useEffect mit Intervall ist ein Indiz dafür, dass dieses API Context nicht geeignet ist
+    Denn es sorgt für ständiges re-rendering auf einigen (warum?) Pages
+    Redux oder Zustand probieren, heben wir uns mal auf für später
+  */
   useEffect(() => {
-    if (state.isModified && deviceIdRef.current) {
-      dispatch({
-        type: "SAVE_TO_SESSION_STORAGE",
-        deviceId: deviceIdRef.current,
-      });
-    }
-  }, [state.isModified, state.image]);
-
-  useEffect(() => {
-    const interval = setInterval(async () => {
+    const intervalId = setInterval(async () => {
       await fetchHealth();
     }, 3000);
-    return () => clearInterval(interval);
-  }, [fetchHealth]);
+
+    return () => clearInterval(intervalId);
+  }, [fetchHealth]); // Kein fetchHealth in den Dependencies
 
   return (
     <DeviceContext.Provider
       value={{
         ...state,
         dispatch,
-        fetchData,
+        fetchConfig,
         fetchImage,
         fetchLogs,
         fetchHealth,
         fetchBenchmarks,
         fetchSimulations,
-        //fetchSimulationImages,
         updateData,
         fetchUserData,
-        fetchCounts,
+        fetchData,
+        fetchSessionData,
       }}
     >
       {children}

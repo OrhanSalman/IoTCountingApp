@@ -1,6 +1,6 @@
 
 import threading
-from src.core.yolo.exporter import export
+from src.core.inference.exporter import export
 from src.utils.logger import Logger
 
 
@@ -28,3 +28,25 @@ def export_model(parameters, logger: Logger):
         logger.error(f"Error in export: {error}")
         return False, error
     return True, None
+
+
+def real_time_status(reached_fps, expected_fps):
+    global real_time
+    real_time = None
+
+    if expected_fps is None or reached_fps is None:
+        return None
+
+    tolerated_fps = expected_fps * 0.9
+    acceptable_fps = expected_fps * 0.75
+
+    if reached_fps >= expected_fps:
+        real_time = 2
+    elif tolerated_fps <= reached_fps < expected_fps:
+        real_time = 2
+    elif acceptable_fps <= reached_fps < tolerated_fps:
+        real_time = 1
+    else:
+        real_time = 0
+
+    return real_time

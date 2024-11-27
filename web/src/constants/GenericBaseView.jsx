@@ -6,7 +6,12 @@ import useIsMobile from "../useIsMobile";
 
 const { Sider, Content } = Layout;
 
-const GenericBaseView = ({ menuItems, defaultKey, contentComponents }) => {
+const GenericBaseView = ({
+  controlTap,
+  menuItems,
+  defaultKey,
+  contentComponents,
+}) => {
   const [activeSiderKey, setActiveSiderKey] = useState(
     defaultKey || menuItems[0]?.key
   );
@@ -40,7 +45,7 @@ const GenericBaseView = ({ menuItems, defaultKey, contentComponents }) => {
   }, [defaultKey, activeSiderKey, location.pathname, menuItems, navigate]);
 
   const ActiveContent = contentComponents[activeSiderKey] || null;
-
+  const Tap = controlTap || null;
   return (
     <>
       <Outlet />
@@ -77,6 +82,7 @@ const GenericBaseView = ({ menuItems, defaultKey, contentComponents }) => {
               borderRadius: borderRadiusLG,
             }}
           >
+            {Tap && <Tap />}
             {ActiveContent && <ActiveContent />}
           </Content>
         </Layout>

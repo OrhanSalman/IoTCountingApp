@@ -50,7 +50,7 @@ const iconMenuItems = [
 ];
 
 const CustomHeader = ({ activeNavKey, onNavChange }) => {
-  const { data, user, logs } = useContext(DeviceContext);
+  const { data, user } = useContext(DeviceContext);
 
   const logout = useHandleLogout();
   const isMobile = useIsMobile();
@@ -111,7 +111,7 @@ const CustomHeader = ({ activeNavKey, onNavChange }) => {
         padding: "0 16px",
       }}
     >
-      {/* Gerätename */}
+      {/*
       <div
         style={{
           color: "white",
@@ -124,8 +124,9 @@ const CustomHeader = ({ activeNavKey, onNavChange }) => {
           marginRight: "auto",
         }}
       >
-        {data?.deviceName || ""}
+        {" "}
       </div>
+      */}
 
       {isMobile ? (
         <Dropdown
@@ -179,17 +180,18 @@ const CustomHeader = ({ activeNavKey, onNavChange }) => {
         {isMobile ? "" : user?.preferred_username || ""}
       </p>
 
-      {user && (
-        <Tooltip title="Logout">
-          <Button
-            type="text"
-            icon={<LogoutOutlined />}
-            style={{ color: "white", marginLeft: "8px" }} // Margin anpassen
-            size={{ xs: "small", sm: "middle" }}
-            onClick={handleLogout}
-          />
-        </Tooltip>
-      )}
+      {user &&
+        user.message !== "OIDC not configured." && ( // poor
+          <Tooltip title="Logout">
+            <Button
+              type="text"
+              icon={<LogoutOutlined />}
+              style={{ color: "white", marginLeft: "8px" }}
+              size={{ xs: "small", sm: "middle" }}
+              onClick={handleLogout}
+            />
+          </Tooltip>
+        )}
     </Header>
   );
 };

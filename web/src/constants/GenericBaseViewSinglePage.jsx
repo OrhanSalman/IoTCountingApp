@@ -3,8 +3,8 @@ import { Layout, Row, Col, theme } from "antd";
 import useIsMobile from "../useIsMobile";
 import { Outlet } from "react-router-dom";
 
+// TODO: wird das überhaupt noch benötigt?
 const GenericBaseViewSinglePage = ({ components }) => {
-  // Destructure components
   const { Content } = Layout;
 
   const isMobile = useIsMobile();

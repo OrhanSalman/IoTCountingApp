@@ -13,17 +13,6 @@ export const useAddHandler = (imageSize) => {
   const maxNumberOfRegions = 5;
   const maxNumberOfRegionPoints = 8;
 
-  const possibleDirections = [
-    "Norden",
-    "Sueden",
-    "Osten",
-    "Westen",
-    "Nordosten",
-    "Nordwesten",
-    "Suedosten",
-    "Suedwesten",
-  ];
-
   const handleAdd = useCallback(() => {
     if (data?.deviceRois?.length >= maxNumberOfRegions) {
       message.error(
@@ -41,31 +30,26 @@ export const useAddHandler = (imageSize) => {
       id: newRoiId,
       isFormationClosed: false,
       line_thickness: 3,
-      points: [],
+      points: [
+        {
+          id: generateTempId(),
+          direction: "Norden",
+          x: x1,
+          y: y1,
+          roi: newRoiId,
+        },
+        {
+          id: generateTempId(),
+          direction: "Norden",
+          x: x2,
+          y: y2,
+          roi: newRoiId,
+        },
+      ],
       region_color: calculateNewColor(data),
       roiName: `ROI_${newKey}`,
       tagsInThisRegion: getDeviceTags(data),
-      onResolution: data?.deviceConfigs[0]?.stream_resolution,
     };
-
-    // Dynamisch die ersten zwei verfügbaren Richtungen hinzufügen
-    const existingDirections =
-      data.deviceRois?.flatMap((roi) =>
-        roi.points.map((point) => point.direction)
-      ) || [];
-    const availableDirections = possibleDirections.filter(
-      (direction) => !existingDirections.includes(direction)
-    );
-
-    for (let i = 0; i < 2 && i < availableDirections.length; i++) {
-      newROI.points.push({
-        id: generateTempId(),
-        direction: availableDirections[i],
-        x: i === 0 ? x1 : x2,
-        y: i === 0 ? y1 : y2,
-        roi: newRoiId,
-      });
-    }
 
     dispatch({
       type: "LOCAL_UPDATE_DEVICE",
@@ -80,7 +64,6 @@ export const useAddHandler = (imageSize) => {
         message.error("Inputgröße ist nicht definiert oder unvollständig.");
         return;
       }
-
       const roiIndex = data?.deviceRois?.findIndex((roi) => roi.id === roiId);
       if (roiIndex === -1) {
         message.error("ROI not found.");
@@ -96,14 +79,9 @@ export const useAddHandler = (imageSize) => {
         return;
       }
 
-      const existingDirections = roi.points.map((point) => point.direction);
-      const nextDirection = possibleDirections.find(
-        (direction) => !existingDirections.includes(direction)
-      );
-
       const newPoint = {
         id: generateTempId(),
-        direction: nextDirection || possibleDirections[0], // Fallback zur ersten Richtung
+        direction: "Norden",
         x: imageSize.width / 2,
         y: imageSize.height / 2,
         roi: roiId ?? null,
@@ -117,14 +95,13 @@ export const useAddHandler = (imageSize) => {
       const updatedDeviceRois = data?.deviceRois?.map((roi) =>
         roi.id === roiId ? updatedRoi : roi
       );
-
       dispatch({
         type: "LOCAL_UPDATE_DEVICE",
         path: ["deviceRois"],
         payload: updatedDeviceRois,
       });
     },
-    [data, dispatch, imageSize, maxNumberOfRegionPoints, possibleDirections]
+    [data, dispatch, imageSize, maxNumberOfRegionPoints]
   );
 
   return {

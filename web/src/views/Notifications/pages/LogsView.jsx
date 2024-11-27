@@ -1,6 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
 import {
-  Button,
   Table,
   InputNumber,
   Input,
@@ -30,9 +29,22 @@ const LogsView = ({ filter }) => {
   };
 
   const formatDate = (dateStr) => {
-    const [datePart, timePart] = dateStr.split(" ");
+    if (!dateStr) {
+      return "Invalid Date";
+    }
+
+    const parts = dateStr.split(" ");
+    if (parts.length < 2) {
+      return dateStr;
+    }
+
+    const [datePart, timePart] = parts;
     const [year, month, day] = datePart.split("-");
-    const [hour, minute] = timePart.split(":");
+    const timeParts = timePart.split(":");
+
+    const hour = timeParts[0] || "00";
+    const minute = timeParts[1] || "00";
+
     return `${day}.${month}.${year} - ${hour}:${minute}`;
   };
 

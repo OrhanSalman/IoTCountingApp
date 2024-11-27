@@ -22,9 +22,7 @@ const postSystemSettings = async (data) => {
       errorHandler(response.status, result.error);
     }
   } catch (error) {
-    message.error(
-      "Beim Speichern der Systemeinstellungen ist ein Fehler aufgetreten."
-    );
+    message.error(`Fehler beim speichern der Systemeinstellungen: ${error}`);
   }
 };
 
@@ -44,9 +42,7 @@ const getSystemSettings = async () => {
       return null;
     }
   } catch (error) {
-    message.error(
-      "Beim Laden der Systemeinstellungen ist ein Fehler aufgetreten."
-    );
+    message.error(`Fehler beim laden der Systemeinstellungen: ${error}`);
   }
 };
 

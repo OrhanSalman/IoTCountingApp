@@ -9,15 +9,15 @@ import numpy as np
 import psutil
 import GPUtil
 import settings
-from src.core.action_helpers import export_model
+from src.core.action_helpers import export_model, real_time_status
 from src.core.cryptography import EncryptionManager
 from src.core.clients.mqtt import MQTTClient
 from src.core.stream.ffmpeg import conversion_in_progress, is_conversion_in_progress
 from src.core.stream.pafy_live import StreamCatcher
 from src.core.stream.stream_solution import StreamSolution
-from src.core.yolo.benchmark import ModelBenchmark
-from src.core.yolo.inference import Inference
-from src.core.yolo.queuemanager import QueueManager
+from src.core.inference.benchmark import ModelBenchmark
+from src.core.inference.inference import Inference
+from src.core.inference.queuemanager import QueueManager
 from src.utils.custom_process import CustomProcess
 from src.utils.logger import Logger
 from src.utils.messyFunctions import convert_to_seconds, whereModel
@@ -28,6 +28,7 @@ logger = Logger("Control", settings.LOG_PATH + "/control.log")
 
 encryption_manager = EncryptionManager()
 pafy_live = StreamCatcher()
+queue_manager: QueueManager = QueueManager()
 
 mqtt_client: MQTTClient = None
 mqtt_thread_instance: Thread = None
@@ -44,14 +45,10 @@ exporting_thread = False
 inference: Inference = None
 inference_thread: Thread = None
 
-queue_manager: QueueManager = QueueManager()
-
 bench: ModelBenchmark = None
 bench_process: CustomProcess = None
 
-# TODO: viel zu tun hier... 
-
-
+# TODO: das hier kann hier eigentlich weg
 def load_encrypted_config(str):
     """Lade und entschlüssele die Konfigurationsdaten."""
     encrypted_data = encryption_manager.load_data(str)
@@ -63,17 +60,17 @@ def load_encrypted_config(str):
         return None
 
 
-
 def start_stream(only_simulation=False):
     global stream, error, bench_process, pafy_live
     error = None
 
-    cam_solution = load_config(settings.CAM_SOLUTIONS_PATH)
-    if not cam_solution.get("cv2", False) and not cam_solution.get("picam2", False):
-        error = "No camera stream solution available."
-        logger.error(error)
-        return False, error 
-    elif stream is None:
+    # Weg, da sonst youtube nicht funktioniert
+    #cam_solution = load_config(settings.CAM_SOLUTIONS_PATH)
+    #if not cam_solution.get("cv2", False) and not cam_solution.get("picam2", False):
+    #    error = "No camera stream solution available."
+    #    logger.error(error)
+    #    return False, error 
+    if stream is None:
         data = load_config(settings.CONFIG_PATH)
         youtube = False
         try:
@@ -126,6 +123,7 @@ def start_stream(only_simulation=False):
                 error = "No camera stream solution available."
                 logger.error(error)
                 return False, error
+            
         except Exception as e:
             error = f"Error while starting camera stream: {e}"
             logger.error(error)
@@ -173,10 +171,7 @@ def start_counting(params = None):
 
     only_simulation = params.get('only_simulation', False)
     only_simulation_img = params.get('only_simulation_img', False)
-    blur_humans = params.get('blur_humans', False)
 
-    #if mongo_client is None:
-    #    start_mongo_client()
     if inference_thread is not None and inference_thread.is_alive():
         error = "Counting is already active."
         logger.warning(error)
@@ -201,13 +196,10 @@ def start_counting(params = None):
     if stream is None and not only_simulation_img:
         start_stream()
         
-        
-        # TODO: weg damit 
     try:
         data = load_config(settings.CONFIG_PATH)
         config = next(config for config in data["deviceConfigs"]) # Vorher hatten wir mehrere Konfigurationen, jetzt nur noch eine
 
-        
         weights = config['model']
         format = config['modelFormat']
         imgsz = config['imgsz']
@@ -262,10 +254,8 @@ def start_counting(params = None):
         stream=stream if not only_simulation_img else stream_img,
         only_simulation=only_simulation,
         only_simulation_img=only_simulation_img,
-        blur_humans=blur_humans,
     )
     
-
     def counting_logic():
         global error
         try:
@@ -284,7 +274,7 @@ def start_counting(params = None):
         #if not inference.inference_started_event.is_set():
         if error or not inference.inference_started_event.is_set():
             inference.deactivate()
-            inference_thread.join(5) # TODO: eig schwachsinn..
+            inference_thread.join(5)
             inference = None
             inference_thread = None
             if error:
@@ -309,8 +299,7 @@ def start_counting(params = None):
             if error:
                 return False, error
             else:
-                return False, "Error while starting counting."  # TODO: das kommt auch beim normalen testlauf img
-
+                return False, "Error while starting counting."
 
     except Exception as e:
         error = f"Error while starting counting: {e}"
@@ -318,6 +307,7 @@ def start_counting(params = None):
         inference.deactivate()
         inference_thread.join()
         return False, error
+
 
 def stop_counting():
     global inference, inference_thread
@@ -346,9 +336,9 @@ def take_snapshot():
     try:
         if stream is None:
             start_stream()
-            time.sleep(2)
+            time.sleep(1)
         if stream is not None:
-            logger.info("TAKE_SNAPSHOT: Taking snapshot...")
+            #logger.info("TAKE_SNAPSHOT: Taking snapshot...")
             stream.capture_image()
             return True
         else:
@@ -356,7 +346,7 @@ def take_snapshot():
             logger.error(error)
             return False, error
     except Exception as e:
-        error = f"TAKE_SNAPSHOT: Error while taking snapshot: {e}"
+        error = f"TAKE_SNAPSHOT: Exception while taking snapshot: {e}"
         logger.error(error)
         return False, error
 
@@ -378,9 +368,10 @@ def take_video(duration):
             return True, "Aufzeichnung gestartet."
         return status, msg
     except Exception as e:
-        error = f"Error while taking video: {e}"
+        error = f"Exception while taking video: {e}"
         logger.error(error)
         return False, error
+
 
 def start_model_benchmark():
     """
@@ -540,27 +531,6 @@ def stop_model_benchmark():
         logger.error(error)
         return False, error
 
-def real_time_status(reached_fps, expected_fps):
-    global real_time
-    real_time = None
-
-    if expected_fps is None or reached_fps is None:
-        return None
-
-    tolerated_fps = expected_fps * 0.9
-    acceptable_fps = expected_fps * 0.75
-
-    if reached_fps >= expected_fps:
-        real_time = 2
-    elif tolerated_fps <= reached_fps < expected_fps:
-        real_time = 2
-    elif acceptable_fps <= reached_fps < tolerated_fps:
-        real_time = 1
-    else:
-        real_time = 0
-
-    return real_time
-
 
 def get_gpu_status():
     """
@@ -582,7 +552,6 @@ def get_gpu_status():
         gpu_status.append(gpu_info)
 
     return gpu_status
-
 
 
 def send_status():
@@ -691,6 +660,7 @@ def start_mongo_client():
     password = str(config.get("password"))
     db = str(config.get("dbname"))
     authEnabled = bool(config.get("authEnabled", False))
+    
 
     def mongo_thread():
         global mongo_client
@@ -714,6 +684,10 @@ def stop_mongo_client():
     global mongo_client, mongo_thread_instance, inference, inference_thread
     
     try:
+        if inference is not None and inference_thread.is_alive():
+            error = "Can't stop MongoDB client. Counting is active."
+            logger.warning(error)
+            return False, error
         if mongo_client is not None:
             mongo_client.client.close()
             mongo_thread_instance.join()
@@ -769,7 +743,11 @@ def start_mqtt_client():
     topics = config.get("topics", {})
     counts_publish_intervall = system_settings['counts_publish_intervall']
     counts_publish_intervall = convert_to_seconds(counts_publish_intervall, system_settings['counts_publish_intervall_format'])
+    deviceName = config.get("deviceName", None)
+    deviceLocation = config.get("deviceLocation", None)
     dataendpoint = config.get("dataEndpoint", None)
+    dataendpoint = dataendpoint.replace("+", deviceName, 1)
+    dataendpoint = dataendpoint.replace("+", deviceLocation, 1)
 
     def mqtt_thread():
         global mqtt_client
@@ -825,8 +803,7 @@ def restart_server():
         logger.error(error)
         return False, error
 
-# TODO: weg...
-# TODO: timing problem, das bild ist nicht blurred oder regionen nicht sichtbar,
+# TODO: timing problem, das bild ist nicht blurred oder regionen nicht sichtbar, raspi zu langsam
 def get_last_inference_frame():
     global inference
     if inference is not None:

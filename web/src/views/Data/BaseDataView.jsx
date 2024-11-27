@@ -3,27 +3,32 @@ import GenericBaseView from "../../constants/GenericBaseView";
 import CountsView from "./pages/CountsView";
 import RoutesView from "./pages/RoutesView";
 import TimesView from "./pages/TimesView";
-import { DatabaseOutlined } from "@ant-design/icons";
+import DataControls from "./pages/DataControls";
+import {
+  BarChartOutlined,
+  EnvironmentOutlined,
+  ClockCircleOutlined,
+} from "@ant-design/icons";
 import { Outlet } from "react-router-dom";
 
 const BaseDataView = () => {
   const menuItems = [
     {
       key: "1",
-      label: "Messungen",
-      icon: <DatabaseOutlined />,
+      label: "Zählungen",
+      icon: <BarChartOutlined />,
       path: "/data/counts",
     },
     {
       key: "2",
       label: "Routen",
-      icon: <DatabaseOutlined />,
-      path: "/data/routes",
+      icon: <EnvironmentOutlined />,
+      path: "/data/tracking",
     },
     {
       key: "3",
       label: "Zeiten",
-      icon: <DatabaseOutlined />,
+      icon: <ClockCircleOutlined />,
       path: "/data/times",
     },
   ];
@@ -37,6 +42,7 @@ const BaseDataView = () => {
   return (
     <>
       <GenericBaseView
+        controlTap={DataControls}
         menuItems={menuItems}
         defaultKey="1"
         contentComponents={contentComponents}

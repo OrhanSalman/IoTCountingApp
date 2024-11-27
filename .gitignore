@@ -1,4 +1,4 @@
-.env/
+.env
 .venv/
 server.pid
 restart.flag
@@ -28,3 +28,4 @@ test.webm
 mongo_config/
 mongo_data/
 runs/
+.DS_Store

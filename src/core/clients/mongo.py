@@ -1,10 +1,12 @@
 import settings
-from pymongo import MongoClient
+from pymongo import MongoClient, AsyncMongoClient
 from pymongo.errors import ConnectionFailure
 from datetime import datetime, timezone
 from bson import ObjectId
 from src.utils.logger import Logger
+from src.utils.tools import load_config
 
+#https://pymongo.readthedocs.io/en/stable/
 
 logger = Logger("MongoClient", settings.LOG_PATH + "/mongoclient.log")
 
@@ -17,6 +19,8 @@ class MongoDB:
         self.authEnabled = authEnabled
         self.username = username
         self.password = password
+        # TODO:
+        self.tls = False
 
         if authEnabled and username and password:
             self.mongo_uri = f"mongodb://{username}:{password}@{host}:{port}/"
@@ -24,6 +28,7 @@ class MongoDB:
             self.mongo_uri = f"mongodb://{host}:{port}/"
         
         try:
+            #self.client = AsyncMongoClient(self.mongo_uri)
             self.client = MongoClient(self.mongo_uri)
             self.db = self.client[db]
         except ConnectionFailure as e:
@@ -59,6 +64,7 @@ class MongoDB:
             logger.error(error)
             return False, error
 
+
     def get_collections(self):
         """
         Ruft alle vorhandenen Collections in der Datenbank ab.
@@ -70,19 +76,6 @@ class MongoDB:
             error = f"Fehler beim Abrufen der Collections: {e}"
             logger.error(error)
             return error
-
-    def create_collections_for_inference(self, inference_id, deviceConfigId):
-        try:
-            print(f"Creating collections for inference {inference_id} and device {deviceConfigId}")
-            self.counts_collection = self._get_or_create_collection(settings.MONGO_COLLECTION_COUNTS + "_" + deviceConfigId + "_" + inference_id)
-            self.tracking_collection = self._get_or_create_collection(settings.MONGO_COLLECTION_TRACKING + "_" + deviceConfigId + "_" + inference_id)
-            self.times_collection = self._get_or_create_collection(settings.MONGO_COLLECTION_TIMES + "_" + deviceConfigId + "_" + inference_id)
-            return True, None
-        except Exception as e:
-            error = f"Fehler beim Erstellen der Collections für {inference_id}: {e}"
-            logger.error(error)
-            return False, error
-
 
     def _get_or_create_collection(self, collection_name: str):
         """
@@ -105,7 +98,7 @@ class MongoDB:
             error = f"Fehler beim Erstellen der Collection: {e}"
             logger.error(error)
             return error
-
+    
     def save_to_collection(self, data, collection_name):
         """
         Speichert Daten in der angegebenen Collection.
@@ -161,62 +154,41 @@ class MongoDB:
         try:
             collection = self.db.get_collection(collection_name)
 
-            # Wenn data_id ein Dictionary ist, hole die ID aus dem Dictionary
             if isinstance(data_id, dict):
-                data_id = data_id.get("_id")  # Hier anpassen, um die richtige ID zu holen
+                data_id = data_id.get("_id")
 
-            object_id = ObjectId(data_id)  # Umwandlung in ObjectId
+            object_id = ObjectId(data_id)
             result = collection.update_one({"_id": object_id}, {"$set": {"published": True}})
         except Exception as e:
             error = f"Fehler beim Markieren des Dokuments als veröffentlicht: {e}"
             logger.error(error)
             return error
+    
+    def get_data(self, type, session_id):
+        """
+        Ruft alle Collections für die angegebene Session-ID ab.
+        """
+        ID = settings.DEVICE_ID
 
-    def update_data(self, filter: dict, update: dict, collection_name: str):
-        """
-        Aktualisiert Daten in der angegebenen Collection basierend auf einem Filter und Update-Daten.
-        """
         try:
-            collection = getattr(self, collection_name, None)
-            if collection:
-                result = collection.update_many(filter, {'$set': update})
-                logger.info(f"{result.modified_count} Dokument(e) aktualisiert in {collection_name}.")
-            else:
-                warning = f"Collection {collection_name} existiert nicht."
-                logger.warning(warning)
-                return warning
-        except Exception as e:
-            error = f"Fehler beim Aktualisieren der Daten: {e}"
-            logger.error(error)
-            return error
+            collection_name = f"{type}_{ID}_{session_id}"
+            data = list(self.db[collection_name].find())
+            
+            return True, data
 
-    def delete_data(self, filter: dict, collection_name: str):
-        """
-        Löscht Daten, die dem angegebenen Filter in der Collection entsprechen.
-        """
-        try:
-            collection = getattr(self, collection_name, None)
-            if collection:
-                result = collection.delete_many(filter)
-                logger.info(f"{result.deleted_count} Dokument(e) gelöscht in {collection_name}.")
-            else:
-                logger.warning(f"Collection {collection_name} existiert nicht.")
         except Exception as e:
-            error = f"Fehler beim Löschen der Daten: {e}"
-            logger.error(error)
-            return error
-
-    # TODO: entfernen, ungenutzt, unnötig
-    def close_connection(self):
-        """
-        Beendet die Verbindung zu MongoDB.
-        """
-        try:
-            self.client.close()
-            info = "Verbindung zu MongoDB geschlossen."
-            logger.info(info)
-            return True, info
-        except Exception as e:
-            error = f"Fehler beim Schließen der Verbindung: {e}"
+            error = f"Fehler beim Abrufen der Collections: {e}"
             logger.error(error)
             return False, error
+    
+    def get_collection_document_size(self, collection_name):
+        """
+        Gibt die Anzahl der Dokumente in der angegebenen Collection zurück.
+        """
+        try:
+            collection = self.db.get_collection(collection_name)
+            return collection.count_documents({})
+        except Exception as e:
+            error = f"Fehler beim Abrufen der Dokumentgröße: {e}"
+            logger.error(error)
+            return error

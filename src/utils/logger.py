@@ -5,14 +5,14 @@ import os
 class Logger:
     def __init__(self, name, log_file, level=logging.INFO, when='W0', interval=1, backup_count=7):
         """
-        Initializes a new logger with timed rotation of log files.
+        Initialisiert einen neuen Logger mit zeitgesteuerter Rotation der Log-Dateien.
 
-        :param name: Name of the logger.
-        :param log_file: Path to the log file.
-        :param level: Logging level.
-        :param when: Time interval for rotating the log files (default: weekly rotation).
-        :param interval: Interval for rotating the log files (default: every week).
-        :param backup_count: How many backup files to keep (default: 7).
+        :param name: Name des Loggers.
+        :param log_file: Pfad zur Log-Datei.
+        :param level: Logging Level.
+        :param when: Zeitintervall für die Rotation der Log-Dateien (Standard: wöchentliche Rotation).
+        :param interval: Intervall für die Rotation der Log-Dateien (Standard: jede Woche).
+        :param backup_count: Wie viele Backup-Dateien behalten werden sollen (Standard: 7).
         """
         log_dir = os.path.dirname(log_file)
         if not os.path.exists(log_dir):
@@ -21,9 +21,9 @@ class Logger:
         self.logger = logging.getLogger(name)
         self.logger.setLevel(level)
 
-        # Ensure no duplicate handlers are added
+        # Stellt sicher, dass keine doppelten Handler hinzugefügt werden
         if not self.logger.handlers:
-            # Create a TimedRotatingFileHandler that writes log entries to a file
+            # Erstellt einen TimedRotatingFileHandler, der Log-Einträge in eine Datei schreibt
             file_handler = TimedRotatingFileHandler(
                 log_file, 
                 when=when, 
@@ -32,16 +32,16 @@ class Logger:
             )
             file_handler.setLevel(level)
 
-            # Create a console handler that writes log entries to the console
+            # Erstellt einen console handler, der Log-Einträge auf die Konsole schreibt
             console_handler = logging.StreamHandler()
             console_handler.setLevel(level)
 
-            # Create a logging format
+            # Erstellt ein Logging-Format
             formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
             file_handler.setFormatter(formatter)
             console_handler.setFormatter(formatter)
 
-            # Add the handlers to the logger
+            # Fügt die Handler zum Logger hinzu
             self.logger.addHandler(file_handler)
             self.logger.addHandler(console_handler)
 

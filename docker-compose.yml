@@ -6,7 +6,7 @@ services:
     container_name: iot-app
     restart: unless-stopped
     env_file:
-      - path: sample.env
+      - path: .env
     environment:
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
       - APP_DOMAIN=${APP_DOMAIN}
@@ -20,6 +20,7 @@ services:
       #- BENCHED=True
       #- SECRET_KEY=${SECRET_KEY}
       #- ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      
       # Add the following lines to enable OIDC
       #- USE_OIDC=${USE_OIDC}
       #- OIDC_HOST=${OIDC_HOST}
@@ -46,14 +47,14 @@ services:
       - monitoring
     ports:
       - "${APP_PORT}:${APP_PORT}"
-    ## Uncomment the following lines to deploy the service on a GPU-enabled node
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
+    ### Uncomment the following lines to deploy the service on a GPU-enabled node
+    #deploy:
+    #  resources:
+    #    reservations:
+    #      devices:
+    #        - driver: nvidia
+    #          count: 1
+    #          capabilities: [gpu]
 
 networks:
   monitoring:

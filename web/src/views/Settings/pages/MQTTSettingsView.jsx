@@ -35,8 +35,6 @@ const { Option } = Select;
 const { Title } = Typography;
 const { Panel } = Collapse;
 
-// Das hier versteht kein Mensch mehr
-
 const MQTTSettingsView = () => {
   const [form] = Form.useForm();
   const [topics, setTopics] = useState({});
@@ -169,7 +167,7 @@ const MQTTSettingsView = () => {
             <List.Item
               style={{
                 display: "flex",
-                alignItems: "center", // sorgt für vertikale Ausrichtung
+                alignItems: "center",
                 width: "100%",
                 gap: "8px",
               }}
@@ -190,7 +188,7 @@ const MQTTSettingsView = () => {
                 rules={[
                   { required: true, message: "Dieses Feld ist erforderlich" },
                 ]}
-                style={{ flexGrow: 1, margin: 0 }} // sorgt dafür, dass das Eingabefeld die restliche Breite einnimmt
+                style={{ flexGrow: 1, margin: 0 }}
               >
                 <Input placeholder={commandValue} disabled />
               </Form.Item>
@@ -412,6 +410,19 @@ const MQTTSettingsView = () => {
           </div>
 
           <Divider />
+
+          <Row gutter={32}>
+            <Col xs={24} sm={12} style={{ paddingRight: "24px" }}>
+              <Form.Item label="Gerätename" name="deviceName">
+                <Input />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={12} style={{ paddingLeft: "24px" }}>
+              <Form.Item label="Standort" name="deviceLocation">
+                <Input />
+              </Form.Item>
+            </Col>
+          </Row>
 
           <Form.Item
             label="Datenendpunkt"

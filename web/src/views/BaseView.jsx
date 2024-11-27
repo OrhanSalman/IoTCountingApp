@@ -77,9 +77,17 @@ const iconMenuItems = [
 
 const BaseView = () => {
   const isMobile = useIsMobile();
-  const { loading, fetchData } = useContext(DeviceContext);
+  const { loading, fetchConfig, fetchHealth } = useContext(DeviceContext);
   const [activeNavKey, setActiveNavKey] = useState("home");
   const location = useLocation();
+
+  useEffect(() => {
+    const intervalId = setInterval(async () => {
+      await fetchHealth();
+    }, 3000);
+
+    return () => clearInterval(intervalId);
+  }, []); // Kein fetchHealth in den Dependencies
 
   const handleNavChange = (e) => {
     const key = e.key;
@@ -117,7 +125,7 @@ const BaseView = () => {
 
   useEffect(() => {
     const fetchDataFromContext = async () => {
-      await fetchData();
+      await fetchConfig();
     };
     fetchDataFromContext();
   }, []);
@@ -150,7 +158,9 @@ const BaseView = () => {
           </Content>
         </Layout>
 
+        {/*
         {!isMobile && <CustomFooter />}
+              */}
       </Layout>
     </>
   );
