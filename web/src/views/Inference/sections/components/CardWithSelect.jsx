@@ -17,8 +17,16 @@ const CardWithSelect = ({ item, deviceConfigs, width, height }) => (
         )
       }
     >
+      {/* TODO: das "value" als default muss geprüft werden, könnte an anderer stelle für probleme sorgen */}
       <Select
-        value={item?.value}
+        value={
+          item?.value ??
+          (item?.options?.length > 0
+            ? item?.options[item?.options?.length - 1].value
+            : undefined)
+        }
+        //value={item?.value}
+        disabled={item?.options?.length === 0}
         options={item?.options?.map((option, optionIndex) => ({
           ...option,
           label: (

@@ -12,6 +12,16 @@ from hypercorn.config import Config
 from hypercorn.asyncio import serve
 from src.utils.tools import daily_restart, load_config
 
+#import ssl
+#
+#try:
+#    _create_unverified_https_context = ssl._create_unverified_context
+#except AttributeError:
+#    # Legacy Python that doesn't verify HTTPS certificates by default
+#    pass
+#else:
+#    # Handle target environment that doesn't support HTTPS verification
+#    ssl._create_default_https_context = _create_unverified_https_context
 
 cleanup_done = False
 
@@ -41,7 +51,7 @@ def initialize_services():
         logger.info("Autostart des MQTT Clients ist aktiviert.")
         start_mqtt_client()
 
-    if not settings.BENCHED:
+    if not settings.BENCHED and not settings.APP_DEV_MODE:
         logger.info("Starte erstes Benchmarking. Ein Neustart im Anschluss ist empfohlen.")
         start_model_benchmark()
     elif settings.AUTO_START_INFERENCE:
@@ -52,7 +62,7 @@ def initialize_services():
 
 
 
-# Hypercorn
+# Konfiguration für Hypercorn
 config = Config()
 config.bind = [f"0.0.0.0:{settings.APP_PORT}"]
 config.workers = 1
@@ -74,6 +84,7 @@ def cleanup():
         return True, None
 
     from src.control import stop_counting, stop_model_benchmark, stop_mongo_client, stop_mqtt_client
+    logger.info("Bereinigung wird durchgeführt.")
     try:
         stop_counting()
         stop_mqtt_client()
@@ -137,7 +148,11 @@ if __name__ == "__main__":
     try:
         with open("server.pid", "w") as f:
             f.write(str(os.getpid()))
-        asyncio.run(serve(application, config=config))
+
+        if settings.APP_DEV_MODE:
+            application.run(host="0.0.0.0", port=settings.APP_PORT, debug=True, use_reloader=True)
+        else:
+            asyncio.run(serve(application, config=config))
 
     except Exception as e:
         logger.error(f"Fehler beim Ausführen des Servers: {e}")

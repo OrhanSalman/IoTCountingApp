@@ -10,22 +10,18 @@ import {
   message,
 } from "antd";
 import {
-  HomeOutlined,
+  PictureOutlined,
   PlayCircleOutlined,
   CameraOutlined,
   AppstoreAddOutlined,
   DashboardOutlined,
   LinkOutlined,
   CloudUploadOutlined,
-  BulbOutlined,
-  ThunderboltOutlined,
-  WifiOutlined,
   SaveOutlined,
   ReloadOutlined,
   DeleteOutlined,
   MoreOutlined,
 } from "@ant-design/icons";
-import GradientButton from "../GradientButton";
 import { DeviceContext } from "../../api/DeviceContext";
 import { deleteData, deleteBenchmarkData } from "../../api/deleteData";
 import runCommand from "../../api/runCommand";
@@ -35,18 +31,18 @@ const { confirm } = Modal;
 
 const StatusBar = () => {
   const {
+    data,
     dispatch,
     health,
     isModified,
     loading,
-    fetchData,
+    fetchConfig,
     fetchImage,
     fetchLogs,
     fetchHealth,
     fetchBenchmarks,
     fetchSimulations,
-    //fetchSimulationImages,
-    fetchCounts,
+    fetchSessionData,
     updateData,
   } = useContext(DeviceContext);
 
@@ -68,6 +64,10 @@ const StatusBar = () => {
       await deleteData(type);
       await fetchSimulations(type);
     }
+  };
+
+  const fetchDeviceImage = async () => {
+    await fetchImage(true);
   };
 
   const deleteOptions = [
@@ -168,9 +168,8 @@ const StatusBar = () => {
   };
 
   const handleReloadData = async () => {
-    const date = new Date().toISOString().split("T")[0];
     await Promise.all([
-      fetchData(),
+      fetchConfig(),
       fetchImage(),
       fetchLogs(),
       fetchHealth(),
@@ -178,7 +177,10 @@ const StatusBar = () => {
       fetchSimulations("simvid"),
       fetchSimulations("simimg"),
       //fetchSimulationImages(),
-      fetchCounts(date),
+      //fetchData("counts"), // TODO warum hier?
+      //fetchData("tracking"),
+      //fetchData("times"),
+      fetchSessionData(),
     ]);
     message.info("Gerätedaten neu geladen");
   };
@@ -186,16 +188,16 @@ const StatusBar = () => {
   const actionButtons = () => {
     return (
       <>
-        <Tooltip title="Speichern">
+        <Tooltip title="Bild anfordern">
           <Button
-            icon={<SaveOutlined />}
-            type="primary"
+            icon={<PictureOutlined />}
+            type="default"
+            //loading={loading}
             style={{
               width: "36px",
-              boxShadow: isModified ? "0 4px 8px rgba(0, 0, 0, 0.2)" : "none",
             }}
-            disabled={!isModified}
-            onClick={handleSave}
+            disabled={data?.deviceConfigs?.length === 0}
+            onClick={fetchDeviceImage}
           />
         </Tooltip>
         <Tooltip title="Neu laden">
@@ -206,6 +208,18 @@ const StatusBar = () => {
             loading={loading}
             icon={<ReloadOutlined />}
             style={{ width: "36px" }}
+          />
+        </Tooltip>
+        <Tooltip title="Speichern">
+          <Button
+            icon={<SaveOutlined />}
+            type="primary"
+            style={{
+              width: "36px",
+              boxShadow: isModified ? "0 4px 8px rgba(0, 0, 0, 0.2)" : "none",
+            }}
+            disabled={!isModified}
+            onClick={handleSave}
           />
         </Tooltip>
         <Dropdown
@@ -283,6 +297,7 @@ const StatusBar = () => {
               type="text"
               loading={loadingStates.counting}
               onClick={() =>
+                // TODO: hier dann auch die sessions fetchen
                 handleButtonClick(
                   "counting",
                   health?.inference?.status ? "stop" : "start"
@@ -409,6 +424,7 @@ const StatusBar = () => {
             }
           >
             <Button
+              disabled={health?.inference?.status}
               icon={<CloudUploadOutlined />}
               type="text"
               loading={loadingStates?.mongo}
@@ -433,24 +449,7 @@ const StatusBar = () => {
               shape="circle"
             />
           </Tooltip>
-          <Tooltip title="Energiesparmodus">
-            <Button
-              disabled
-              icon={<BulbOutlined />}
-              type="text"
-              onClick={() =>
-                handleButtonClick("energy", "energy", "start", "stop")
-              }
-              style={{
-                backgroundColor: health?.energy?.status ? "blue" : "lightgray",
-                color: "white",
-                fontSize: isMobile ? "12px" : "inherit",
-                width: isMobile ? "32px" : "auto",
-                height: isMobile ? "32px" : "auto",
-              }}
-              shape="circle"
-            />
-          </Tooltip>
+
           <Divider solid type="vertical" />
         </Col>
 

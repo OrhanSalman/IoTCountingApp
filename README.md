@@ -25,7 +25,6 @@
         <li><a href="#first-steps">First steps</a></li>
       </ul>
     </li>
-    <li><a href="#usage">Usage</a></li> 
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
   </ol>

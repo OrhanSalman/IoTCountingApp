@@ -37,6 +37,9 @@ RUN apt update && apt install -y --no-install-recommends \
   rm -rf /var/cache/apt/archives/* && \
   rm -rf /var/lib/apt/lists/*
 
+# ------------------------------------------------------------------------------------------------
+# Build and run application
+# ------------------------------------------------------------------------------------------------
 
 WORKDIR /
 
@@ -44,7 +47,6 @@ COPY requirements.txt .
 
 
 RUN python3 -m venv --system-site-packages /venv && \
-  /venv/bin/pip install --upgrade pip setuptools wheel && \
   /venv/bin/pip install --no-cache-dir -r requirements.txt && \
   /venv/bin/pip cache purge && \
   rm -rf /root/.cache/pip

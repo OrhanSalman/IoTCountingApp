@@ -177,17 +177,17 @@ const ROIView = () => {
                 </Checkbox>
               </>
             ),
-            right: (
-              <Button
-                type="primary"
-                style={{ marginBottom: 8, marginLeft: 16 }}
-                loading={loading}
-                onClick={fetchDeviceImage}
-                disabled={data?.deviceConfigs?.length === 0}
-              >
-                {loading ? "Hole Snap..." : "Neues Bild"}
-              </Button>
-            ),
+            //right: (
+            //  <Button
+            //    type="primary"
+            //    style={{ marginBottom: 8, marginLeft: 16 }}
+            //    loading={loading}
+            //    onClick={fetchDeviceImage}
+            //    disabled={data?.deviceConfigs?.length === 0}
+            //  >
+            //    {loading ? "Hole Snap..." : "Neues Bild"}
+            //  </Button>
+            //),
           }}
         />
       </div>

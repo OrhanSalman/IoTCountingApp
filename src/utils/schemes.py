@@ -26,7 +26,6 @@ MQTT_SETTINGS = {
                         "benchmark_start": {"type": "string"},
                         "benchmark_stop": {"type": "string"},
                         "status": {"type": "string"},
-                        #"restart": {"type": "string"}  # TODO
                     },
                     "additionalProperties": False
                 }
@@ -35,9 +34,11 @@ MQTT_SETTINGS = {
         },
         "willMessage": {"type": "string"},
         "username": {"type": "string"},
-        "password": {"type": "string"}
+        "password": {"type": "string"},
+        "deviceName": {"type": "string"},
+        "deviceLocation": {"type": "string"},
     },
-    "required": ["authEnabled", "cleanSession", "clientId", "dataEndpoint", "host", "keepAlive", "port", "qos", "tls", "topics"],
+    "required": ["authEnabled", "deviceName", "deviceLocation", "cleanSession", "clientId", "dataEndpoint", "host", "keepAlive", "port", "qos", "tls", "topics"],
     "additionalProperties": False
 }
 
@@ -106,8 +107,6 @@ CONFIG_SCHEMA = {
                 "additionalProperties": True
             }
         },
-        "deviceName": {"type": "string"},
-        "deviceLocation": {"type": "string"},
         "deviceRois": {
             "type": "array",
             "items": {
@@ -164,7 +163,7 @@ CONFIG_SCHEMA = {
         "mps_built": {"type": "boolean"},
         "mps_available": {"type": "boolean"}
     },
-    "required": ["deviceConfigs", "deviceName", "deviceLocation", "deviceTags"],
+    "required": ["deviceConfigs", "deviceTags"],
     "additionalProperties": False
 }
 
@@ -178,7 +177,7 @@ def validate_config(data):
 SETTINGS_SCHEMA = {
     "type": "object",
     "properties": {
-        "automatic_update": {"type": "boolean"},
+        "id": {"type": "string", "format": "uuid"},
         "auto_start_inference": {"type": "boolean"},
         "auto_start_mqtt_client": {"type": "boolean"},
         "auto_start_mongo_client": {"type": "boolean"},
@@ -191,19 +190,17 @@ SETTINGS_SCHEMA = {
         "blur_humans": {"type": "boolean"},
         "max_tracking_points_length": {"type": "integer"},
         "save_counts_to_mongo": {"type": "boolean"},
-        "save_counts_to_queue_if_mongo_down": {"type": "boolean"},
-        "ensure_not_data_loss_to_file": {"type": "boolean"},
         "daily_cleanup_time": {"type": "string"},
         #"mqtt_max_publish_limit": {"type": "integer"}
         
     },
-    "required": ["automatic_update", "auto_start_inference", "auto_start_mqtt_client", "auto_start_mongo_client",
+    "required": ["auto_start_inference", "auto_start_mqtt_client", "auto_start_mongo_client",
                  "counts_save_intervall", "counts_save_intervall_format", 
                  "counts_publish_intervall", "counts_publish_intervall_format", 
                  "detect_count_timespan", "detect_count_routes", "blur_humans", 
-                 "max_tracking_points_length", "save_counts_to_mongo", "save_counts_to_queue_if_mongo_down",
-                 "ensure_not_data_loss_to_file", "daily_cleanup_time"],
-    "additionalProperties": False
+                 "max_tracking_points_length", "save_counts_to_mongo",
+                 "daily_cleanup_time"],
+    "additionalProperties": True
 }
 
 def validate_settings(data):

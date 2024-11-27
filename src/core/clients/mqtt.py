@@ -1,5 +1,4 @@
 import json
-import os
 import threading
 import time
 import paho.mqtt.client as mqtt
@@ -7,7 +6,6 @@ import settings
 from src.utils.logger import Logger
 from src.utils.topic_payload_parser import parse_topics_and_payloads, parse_topics_and_payloads_from_queue
 from src.core.clients.mongo import MongoDB
-from src.core.yolo.queuemanager import QueueManager
 
 logger = Logger("MQTT", settings.LOG_PATH + "/mqtt.log")
 
@@ -37,8 +35,6 @@ class MQTTClient:
         self.connect_event = threading.Event()
         self.publish_counts_job = True
         self.published_messages_since_start = 0
-        #mongo_client = mongo_client
-
 
         # Callbacks
         self.client.on_connect = self.on_connect
@@ -82,11 +78,8 @@ class MQTTClient:
             return False, error
         
 
-
     def is_connected(self):
         return self.client.is_connected()
-        #return self.connected
-
 
 
     def on_connect(self, client, userdata, flags, rc, properties):
@@ -216,17 +209,10 @@ class MQTTClient:
                 time.sleep(self.counts_publish_intervall)
                 from src.control import mongo_client, queue_manager
 
-                # 1. Wenn kein Dataendpoint gesetzt ist, brauchen wir gar nicht erst weitermachen
-                if not self.dataendpoint:
-                    from src.control import load_encrypted_config
-                    dataendpoint = load_encrypted_config("mqtt")["dataendpoint"]
-                    if not dataendpoint:
-                        logger.warning("Cannot work for publishing data. Dataendpoint is not set.")
-                        continue
-                elif not self.is_connected():
+                if not self.is_connected():
                     logger.warning("Cannot work for publishing data. MQTT client is not connected.")
                     continue
-                # 2. Vorrang haben temporäre Daten aus der Queue
+                # Vorrang haben temporäre Daten aus der Queue
                 elif not queue_manager.is_queue_empty():
                     logger.info("Found unpublished data in queue.")
                     self.publish_from_queue()
@@ -253,7 +239,7 @@ class MQTTClient:
             from src.control import mongo_client
 
             collections = mongo_client.get_collections()
-            collections = [collection for collection in collections if collection.startswith("counts")]
+            collections = [collection for collection in collections if collection.startswith(f"counts_" + settings.DEVICE_ID )]
             if collections:
                 for collection in collections:
                     status, unpublished_data = mongo_client.get_unpublished_data(collection)
@@ -262,7 +248,6 @@ class MQTTClient:
                         logger.warning(f"Cannot get unpublished data from {collection}: {unpublished_data}")
                         break
                     elif unpublished_data is None:
-                        logger.info(f"No unpublished data in {collection}.")
                         pass
                     else:
                         unpublished_data = unpublished_data
@@ -272,6 +257,7 @@ class MQTTClient:
                             self.publish(topic, str(payload), qos=self.qos)
                             time.sleep(0.01)
 
+                            # TODO: entfernen, wir wollen nur aus der queue veröffentlichen...
                             # Setze die Einträge als veröffentlicht
                             for entry in unpublished_data:
                                 mongo_client.set_data_published(collection, entry["_id"])

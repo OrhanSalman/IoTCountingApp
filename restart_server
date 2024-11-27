@@ -2,10 +2,8 @@
 
 RESTART_FILE="restart.flag"
 
-# Create directory if it doesn't exist
 mkdir -p data/logs
 
-# Define log file
 LOG_FILE="data/logs/SYSTEM_RESTART.log"
 
 touch $LOG_FILE
@@ -14,31 +12,30 @@ while true; do
     if [ -f "server.pid" ]; then
         SERVER_PID=$(cat server.pid)
 
-        # Check if the RESTART_FILE exists
+        # Prüfe, ob die RESTART_FILE existiert
         if [ -f "$RESTART_FILE" ]; then
-            echo "Server restart detected." >> $LOG_FILE
+            echo "Server-Neustart erkannt." >> $LOG_FILE
             rm -f "$RESTART_FILE"
 
-            # Send SIGTERM to the server process and wait for it to terminate
+            # Sende SIGTERM an den Server-Prozess und warte auf die Beendigung
             kill -15 $SERVER_PID
-            echo "SIGTERM sent to server (PID: $SERVER_PID)." >> $LOG_FILE
-            sleep 5  # Wait for clean shutdown
+            echo "SIGTERM an Server gesendet (PID: $SERVER_PID)." >> $LOG_FILE
+            sleep 5  # Warte auf sauberen Shutdown
 
-            # If the process is still running, send SIGKILL as a last resort
+            # Falls der Prozess noch läuft, sende SIGKILL als letzten Ausweg
             if ps -p $SERVER_PID > /dev/null; then
-                echo "Process did not terminate. Forcing shutdown." >> $LOG_FILE
+                echo "Prozess wurde nicht beendet. Erzwinge Shutdown." >> $LOG_FILE
                 kill -9 $SERVER_PID
             fi
 
-            # Restart the server and redirect output to main.log
-            echo "Restarting server..." >> $LOG_FILE
+            # Starte den Server neu und leite Ausgabe in main.log
+            echo "Server wird neu gestartet..." >> $LOG_FILE
             python app.py
             NEW_SERVER_PID=$!
             echo $NEW_SERVER_PID > server.pid
-            echo "Server restarted with PID: $NEW_SERVER_PID." >> $LOG_FILE
+            echo "Server neu gestartet mit PID: $NEW_SERVER_PID." >> $LOG_FILE
         fi
     fi
 
-    # Sleep until a restart is triggered
     sleep 2
 done

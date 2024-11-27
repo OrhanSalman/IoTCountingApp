@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Function to detect the architecture
+# Funktion zur Erkennung der Architektur
 detect_platform() {
   if [[ $(uname -m) == "x86_64" ]]; then
     echo "x86_64"  # 64-bit x86
@@ -9,14 +9,14 @@ detect_platform() {
   elif [[ $(uname -m) == "armv7l" ]]; then
     echo "arm"     # ARM 32-bit
   else
-    echo "unknown" # Unknown architecture
+    echo "unknown" # Unbekannte Architektur
   fi
 }
 
-# Detect architecture
+# Architektur erkennen
 PLATFORM=$(detect_platform)
 
-# Set environment variables or specific configurations
+# Umgebungsvariablen oder spezifische Konfigurationen setzen
 case $PLATFORM in
   x86_64)
     echo "Detected platform: x86_64"
@@ -25,13 +25,13 @@ case $PLATFORM in
     ;;
   arm64)
     echo "Detected platform: arm64"
-    # Check CPU architecture and features
+    # Überprüfen der CPU-Architektur und -Features
     CPU_INFO=$(lscpu | grep "Architecture" | awk '{print $2}')
     echo "Detected CPU architecture: $CPU_INFO"
 
-    # Check ARM version (minimum ARMv8.2-A)
+    # Überprüfung der ARM-Version (mindestens ARMv8.2-A)
     if [[ "$CPU_INFO" == "aarch64" ]]; then
-      # Additional check for ARMv8.2-A features
+      # Zusätzliche Überprüfung auf ARMv8.2-A-Features
       ARM_FEATURES=$(lscpu | grep -E "Flags|v8")
       if echo "$ARM_FEATURES" | grep -q "v8"; then
         export REDIS_IMAGE="arm64v8/redis:latest"
@@ -62,6 +62,6 @@ case $PLATFORM in
     ;;
 esac
 
-# Output the set environment variables
+# Ausgabe der gesetzten Umgebungsvariablen
 echo "Using Redis image: $REDIS_IMAGE"
 echo "Using MongoDB image: $MONGODB_IMAGE"

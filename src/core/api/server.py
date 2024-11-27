@@ -1,6 +1,7 @@
 import json
 import mimetypes
 import os
+from bson import ObjectId
 import requests
 import time
 import settings
@@ -15,9 +16,8 @@ from src.control import get_last_inference_frame
 from src.core.cryptography import EncryptionManager
 #from src.utils.authenticator import token_required
 from src.utils.logger import Logger
-from src.utils.messyFunctions import generateUUID
-from src.utils.schemes import (validate_config, validate_mongo_data, validate_settings, validate_mqtt_data)
-from src.utils.tools import load_config
+from src.utils.messyFunctions import generateUUID, delete_session
+from src.utils.schemes import validate_config, validate_mongo_data, validate_settings, validate_mqtt_data
 from authlib.integrations.base_client.errors import OAuthError, MismatchingStateError
 
 
@@ -31,11 +31,12 @@ SECRET_KEY = settings.SECRET_KEY
 app = Flask(__name__, static_folder=settings.BUILD_PATH, static_url_path="/")
 app.debug = settings.APP_DEV_MODE
 app.config['SECRET_KEY'] = SECRET_KEY
-app.config['SESSION_TYPE'] = 'redis'
-app.config['SESSION_PERMANENT'] = True
-#app.config['SESSION_USE_SIGNER'] = True
-if settings.APP_REDIS_SERVER:
+
+if not settings.APP_DEV_MODE and settings.APP_REDIS_SERVER:
+    app.config['SESSION_TYPE'] = 'redis'
+    app.config['SESSION_PERMANENT'] = True
     app.config['SESSION_REDIS'] = Redis.from_url(f'redis://{settings.REDIS_HOST}:{settings.REDIS_PORT}')
+    Session(app)
 
 CORS(
     app,
@@ -43,7 +44,6 @@ CORS(
     supports_credentials=True,
     allow_headers=["Content-Type", "Authorization", "Access-Control-Allow-Origin"]
 )
-Session(app)
 
 # Authlib OAuth-Setup
 if settings.USE_OIDC:
@@ -77,13 +77,13 @@ if settings.USE_OIDC:
             if token_info.get('active'):
                 exp = token_info.get('exp')
                 if exp and exp > int(time.time()):
-                    return True  # Token is active and not expired
+                    return True  # Token ist aktiv und nicht abgelaufen
                 else:
-                    return False  # Token is expired
+                    return False  # Token ist abgelaufen
             else:
-                return False  # Token is not active
+                return False  # Token ist nicht aktiv
         else:
-            # print(f"Error during token introspection: {response.status_code}")
+            #print(f"Fehler bei der Token-Introspektion: {response.status_code}")
             return False
 
 
@@ -101,7 +101,7 @@ def require_auth():
     if not settings.USE_OIDC:
         return
     if request.endpoint in ['login', 'auth', 'logout']:
-        return  # No authentication for these routes
+        return  # Keine Authentifizierung für diese Routen
 
     if 'oidc_auth_token' in session:
         token = session['oidc_auth_token'].get('access_token')
@@ -109,19 +109,19 @@ def require_auth():
 
         if token:
             expiration_time = datetime.fromtimestamp(expires_at)
-            # print("Token expires at:", expiration_time.strftime("%Y-%m-%d %H:%M:%S"))
+            #print("Token läuft ab um:", expiration_time.strftime("%Y-%m-%d %H:%M:%S"))
 
-        # Check if the token has expired
+        # Überprüfen, ob das Token abgelaufen ist
         if not token or (expires_at and time.time() > expires_at):
-            session.clear()  # Clear the session
+            session.clear()  # Session leeren
             return redirect(url_for('login'))
 
-        # Token introspection
+        # Token Introspektion
         if not introspect_token(token):
             session.clear()
             return redirect(url_for('login'))
 
-        return  # User is logged in and the token is valid
+        return  # Benutzer ist eingeloggt und Token ist gültig
 
     auth_header = request.headers.get("Authorization")
     if auth_header and auth_header.startswith("Bearer "):
@@ -134,7 +134,6 @@ def require_auth():
     return redirect(url_for('login'))
 
 
-
 @app.route('/login')
 def login():
     if not settings.USE_OIDC:
@@ -143,12 +142,35 @@ def login():
     return oauth.oidc.authorize_redirect(redirect_uri)
 
 
+@app.errorhandler(404)
+def not_found_error(error):
+    return send_from_directory(app.static_folder, "index.html")
+
+
+@app.route("/api/userinfo", methods=["GET"])
+def userinfo():
+    if not settings.USE_OIDC:
+        return jsonify({"message": "OIDC not configured."}), 200
+    # Abrufen der Benutzerinformationen aus der Session
+    oidc_session_info = {
+        "sub": session['oidc_auth_token'].get("sub"),
+        "email_verified": session['oidc_auth_token'].get("email_verified"),
+        "roles": session['oidc_auth_token'].get("roles"),
+        "groups": session['oidc_auth_token'].get("groups"),
+        "preferred_username": session['oidc_auth_token'].get("preferred_username"),
+        "given_name": session['oidc_auth_token'].get("given_name"),
+        "family_name": session['oidc_auth_token'].get("family_name"),
+        "email": session['oidc_auth_token'].get("email"),
+    }
+
+    return json.dumps(oidc_session_info), 200
+
 
 @app.route('/auth')
 def auth():
     if not settings.USE_OIDC:
         return jsonify({"message": "OIDC not configured."}), 200
-    """    
+    
     try:
         token = oauth.oidc.authorize_access_token()
     except MismatchingStateError as e:
@@ -159,24 +181,7 @@ def auth():
         # Log other OAuth errors
         app.logger.error(f"OAuthError: {str(e)}")
         return jsonify({"error": "Authentication failed.", "details": str(e)}), 401
-    """
-
-    # TODO: das hier muss noch getestet werden. Wenn es nicht funktioniert, vorest die obige Lösung verwenden
-    try:
-        # Versuche, das Token zu erhalten
-        token = oauth.oidc.authorize_access_token()
-    except MismatchingStateError as e:
-        app.logger.error(f"MismatchingStateError: {str(e)}")
-        # Sitzung löschen und Benutzer zum Login weiterleiten
-        session.clear()
-        return redirect(url_for('login'))
-
-    except OAuthError as e:
-        app.logger.error(f"OAuthError: {str(e)}")
-        # Sitzung löschen und Benutzer zum Login weiterleiten
-        session.clear()
-        return redirect(url_for('login'))
-
+    
     if token:
         userinfo_url = settings.OIDC_USERINFO_URI
         userinfo_response = requests.get(userinfo_url, headers={"Authorization": f"Bearer {token['access_token']}"})
@@ -194,8 +199,6 @@ def auth():
     return Response("Authentication failed.", status=401)
 
 
-
-
 @app.route('/signout', methods=['POST'])
 def logout():
     if request.method == 'POST':
@@ -211,24 +214,23 @@ def logout():
                 f"post_logout_redirect_uri={urllib.parse.quote(settings.APP_DOMAIN + '/', safe='')}"
             )
             try:
-                # This logs the user out from the OIDC provider
+                # So loggt der Server den User beim OIDC Provider aus aus
                 logout_response = requests.get(logout_url)
 
                 if logout_response.status_code == 200:
-                    # return Response(logout_url, status=200)
+                    #return Response(logout_url, status=200)
                     session.clear()
                     return Response(url_for('login'), status=200)
-                    # This allows the user to log out themselves. Less secure
-                    # return Response(logout_url, status=200)
+                    # So loggt der User sich selber aus. Weniger sicher
+                    #return Response(logout_url, status=200)
                 else:
                     return Response("Logout failed on external server.", status=500)
             except Exception as e:
                 return Response(f"Error during logout request: {str(e)}", status=500)
 
         else:
-            # No id_token present
+            # kein id_token vorhanden
             return Response("No Session found.", status=404)
-
 
 
 @app.route("/api/mqtt", methods=["POST", "DELETE", "GET"])
@@ -236,21 +238,21 @@ def mqtt():
     if request.method == "POST":
         data = request.json
         
-        # Load the existing data if the file exists
+        # Lade die vorhandenen Daten, wenn die Datei existiert
         encrypted_data = encryption_manager.load_data("mqtt") if os.path.exists(encryption_manager.MQTT_DATA_FILE) else None
         
-        # Decrypt existing data
+        # Bestehende Daten entschlüsseln
         if encrypted_data:
             existing_data = json.loads(encryption_manager.decrypt_data(encrypted_data))
             
-            # Get the old password from the existing data
+            # Altes Passwort aus den bestehenden Daten holen
             existing_password = existing_data.get("password")
 
-            # Check if a new password is set
+            # Prüfen, ob ein neues Passwort gesetzt ist
             new_password = data.get("password")
             
-            # If a password is present in the data and the new password is ***,
-            # then the old password should be used
+            # Wenn ein Passwort in den Daten vorhanden ist und das neue Passwort ist ***,
+            # dann soll das alte Passwort verwendet werden
             if new_password and new_password == "*" * len(new_password):
                 data["password"] = existing_password
 
@@ -270,7 +272,6 @@ def mqtt():
 
         return jsonify({"message": "Gespeichert." + (" Neustart des MQTT-Clients empfohlen." if status else "")}), 200
     
-    
     if request.method == "DELETE":
         # Lösche die gespeicherte verschlüsselte Konfiguration
         if os.path.exists(encryption_manager.MQTT_DATA_FILE):
@@ -287,6 +288,7 @@ def mqtt():
             return jsonify(data)
         else:
             return jsonify({"message": "Keine Konfiguration gefunden"}), 404
+
 
 @app.route("/api/mongo", methods=["POST", "DELETE", "GET"])
 def mongo():
@@ -344,30 +346,6 @@ def mongo():
             return jsonify({"message": "Keine Konfiguration gefunden"}), 404
 
 
-@app.errorhandler(404)
-def not_found_error(error):
-    return send_from_directory(app.static_folder, "index.html")
-
-
-@app.route("/api/userinfo", methods=["GET"])
-def userinfo():
-    if not settings.USE_OIDC:
-        return jsonify({"message": "OIDC not configured."}), 200
-    # Abrufen der Benutzerinformationen aus der Session
-    oidc_session_info = {
-        "sub": session['oidc_auth_token'].get("sub"),
-        "email_verified": session['oidc_auth_token'].get("email_verified"),
-        "roles": session['oidc_auth_token'].get("roles"),
-        "groups": session['oidc_auth_token'].get("groups"),
-        "preferred_username": session['oidc_auth_token'].get("preferred_username"),
-        "given_name": session['oidc_auth_token'].get("given_name"),
-        "family_name": session['oidc_auth_token'].get("family_name"),
-        "email": session['oidc_auth_token'].get("email"),
-    }
-
-    return json.dumps(oidc_session_info), 200
-
-
 @app.route("/api/config", methods=["GET", "POST"], endpoint='config')
 def config():
     from src.utils.generateDefaults import generateDefaultConfigIfNotExists
@@ -397,7 +375,6 @@ def config():
             return Response(str(e), status=400)
 
         with open(settings.CONFIG_PATH, "w") as file:
-            logger.info("Config file updated")
             json.dump(data, file)
             
             return Response(status=200)
@@ -467,6 +444,7 @@ def health():
     if request.method == 'GET':
         return send_status()
 
+
 @app.route('/api/benchmarks', methods=['GET', 'DELETE'], endpoint='benchmarks')
 def benchmarks():
     if request.method == 'GET':
@@ -501,11 +479,11 @@ def api_image():
     from src.control import take_snapshot
     image_path = settings.IMG_PATH + "/capture.jpg"
 
-    cam_solutions = load_config(settings.CAM_SOLUTIONS_PATH)
-    if not cam_solutions or (not cam_solutions.get("cv2", False) and not cam_solutions.get("picam2", False)):
-        error = "Keine Kamera-Lösungen gefunden."
-        logger.error(error)
-        return Response(error, status=400)
+    #cam_solutions = load_config(settings.CAM_SOLUTIONS_PATH)
+    #if not cam_solutions or (not cam_solutions.get("cv2", False) and not cam_solutions.get("picam2", False)):
+    #    error = "Keine Kamera-Lösungen gefunden."
+    #    logger.error(error)
+    #    return Response(error, status=400)
     
     if request.args.get('snap') == 'true':
         logger.info('Received GET on /api/image with snap=true. Taking Snapshot...')
@@ -694,19 +672,85 @@ def get_file(filename):
 
 @app.route('/api/data', methods=['GET'])
 def get_mongo_data():
-    pass
+    
+    if request.method == 'GET':
+        from src.control import mongo_client
 
-@app.route('/api/counts', methods=['GET'])
-def get_counts():
-    return jsonify({'error': 'Diese Funktion ist nicht verfügbar.'}), 404
+        if not mongo_client or not hasattr(mongo_client, 'is_connected') or not mongo_client.is_connected():
+            return jsonify({'error': 'MongoDB not connected.'}), 503
 
-@app.route('/api/tracks', methods=['GET'])
-def get_tracking():
-    return jsonify({'error': 'Diese Funktion ist nicht verfügbar.'}), 404
+        session_id = request.args.get('session_id', None)
+        type = request.args.get('type', None)
 
+        if type is None:
+            return jsonify({'error': 'Missing type parameter.'}), 400
 
+        if not session_id or not session_id:
+            return jsonify({'error': 'Missing session_id parameters.'}), 400
+
+        try:
+            success, data = mongo_client.get_data(type, session_id)
+            if not success:
+                return jsonify({'error': 'Failed to retrieve data.'}), 500
+
+            def serialize(data):
+                if isinstance(data, ObjectId):
+                    return str(data)
+                elif isinstance(data, list):
+                    return [serialize(item) for item in data]
+                elif isinstance(data, dict):
+                    return {key: serialize(value) for key, value in data.items()}
+                else:
+                    return data
+
+            # Aggregation der Daten
+            if type == "counts":
+                aggregated_data = {}
+
+                # Durchlaufe alle Datensätze und aggregiere sie
+                for entry in data:
+                    # Hier prüfen wir, ob die Struktur von entry den Erwartungen entspricht
+                    if isinstance(entry, dict):
+                        for roi, directions in entry.items():
+                            if roi not in aggregated_data:
+                                aggregated_data[roi] = {}
+
+                            # Prüfe die Struktur von directions
+                            if isinstance(directions, dict):
+                                for direction, counts in directions.items():
+                                    if direction not in aggregated_data[roi]:
+                                        aggregated_data[roi][direction] = {"IN": {}, "OUT": {}}
+
+                                    # Aggregiere IN
+                                    if 'IN' in counts:
+                                        for obj_class, count in counts['IN'].items():
+                                            if obj_class not in aggregated_data[roi][direction]["IN"]:
+                                                aggregated_data[roi][direction]["IN"][obj_class] = 0
+                                            aggregated_data[roi][direction]["IN"][obj_class] += count
+
+                                    # Aggregiere OUT
+                                    if 'OUT' in counts:
+                                        for obj_class, count in counts['OUT'].items():
+                                            if obj_class not in aggregated_data[roi][direction]["OUT"]:
+                                                aggregated_data[roi][direction]["OUT"][obj_class] = 0
+                                            aggregated_data[roi][direction]["OUT"][obj_class] += count
+                            else:
+                                # Debugging-Ausgabe, falls directions keine dict-Struktur hat
+                                # TODO !
+                                # Im Prinzip eliminiert das hier nur die _id und timestamp, könnte ruhig so bleiben
+                                #print(f"Unexpected structure for directions: {directions}")
+                                pass
+
+                return jsonify(serialize(aggregated_data))
+
+            return jsonify(serialize(data))
+
+        except ValueError:
+            return jsonify({'error': 'Invalid format.'}), 400
+
+    
 last_frame_request = 0
-request_interval = 10
+request_interval = 5
 
 @app.route('/api/inference/frame', methods=['GET'])
 def get_inference_frame():
@@ -725,8 +769,6 @@ def get_inference_frame():
         return jsonify({'error': 'No frame found.'}), 404
     
 
-#pafy_live = None
-
 @app.route('/api/youtube', methods=['GET'])
 def youtube_stream():
     url = request.args.get('url')
@@ -740,4 +782,30 @@ def youtube_stream():
     
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/sessions', methods=['GET', 'DELETE'])
+def get_sessions():
+    import settings
+    path = settings.SESSIONS_PATH
+
+    if not os.path.exists(path):
+        return jsonify({'error': 'No sessions found.'}), 404
     
+    if request.method == 'GET':
+        with open(path, 'r') as f:
+            session_data = json.load(f)
+            
+        if 'sessions' in session_data:
+            session_data['sessions'].reverse()
+            
+        return jsonify(session_data)
+    
+    if request.method == 'DELETE':
+        id = request.args.get('id')
+        
+        try:
+            delete_session(id, settings.SESSIONS_PATH)
+            return jsonify({'message': 'Session deleted.'}), 200
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500

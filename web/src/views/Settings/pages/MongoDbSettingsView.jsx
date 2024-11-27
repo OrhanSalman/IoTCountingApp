@@ -87,7 +87,7 @@ const MongoDbSettingsView = () => {
   return (
     <>
       <div style={{ padding: "20px", margin: "0 auto" }}>
-        <Title level={4}>MongoDB Settings</Title>
+        <Title level={4}>MongoDB Einstellungen</Title>
         <Divider />
         <Form
           form={form}

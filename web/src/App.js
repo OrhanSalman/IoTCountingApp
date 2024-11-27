@@ -12,6 +12,9 @@ import BaseInferenceView from "./views/Inference/BaseInferenceView";
 import BaseNotifcationsView from "./views/Notifications/BaseNotifcationsView";
 import BaseSettingsView from "./views/Settings/BaseSettingsView";
 import LogsView from "./views/Notifications/pages/LogsView";
+import CountsView from "./views/Data/pages/CountsView";
+import RoutesView from "./views/Data/pages/RoutesView";
+import TimesView from "./views/Data/pages/TimesView";
 import { DeviceProvider } from "./api/DeviceContext";
 
 const App = () => {
@@ -21,9 +24,16 @@ const App = () => {
         <BaseView>
           <Routes>
             <Route path="/" element={<DashboardView />} />
-            <Route path="/data/*" element={<BaseDataView />} />
+            <Route path="/data/*" element={<BaseDataView />}>
+              {/* TODO: */}
+              <Route path="/data/counts" element={<CountsView />} />
+              <Route path="/data/tracking" element={<RoutesView />} />
+              <Route path="/data/times" element={<TimesView />} />
+            </Route>
             <Route path="/inference/*" element={<BaseInferenceView />} />
             <Route path="/logs/*" element={<BaseNotifcationsView />}>
+              {/* TODO: */}
+
               <Route path="errors" element={<LogsView filter="error" />} />
               <Route path="warnings" element={<LogsView filter="warning" />} />
               <Route path="infos" element={<LogsView filter="info" />} />

@@ -34,6 +34,26 @@ class CameraStream:
             actual_height = self.stream.get(cv2.CAP_PROP_FRAME_HEIGHT)
             actual_fps = self.stream.get(cv2.CAP_PROP_FPS)
             
+            ## auto focus
+            #self.stream.set(cv2.CAP_PROP_AUTOFOCUS, 1)
+            ## hdr
+            #self.stream.set(cv2.CAP_PROP_AUTO_EXPOSURE, 1)
+            #
+            ## brightness
+            #self.stream.set(cv2.CAP_PROP_BRIGHTNESS, 0.5)
+            ## contrast
+            #self.stream.set(cv2.CAP_PROP_CONTRAST, 0.5)
+            ## saturation
+            #self.stream.set(cv2.CAP_PROP_SATURATION, 0.5)
+            ## hue
+            #self.stream.set(cv2.CAP_PROP_HUE, 0.5)
+            ## gain
+            #self.stream.set(cv2.CAP_PROP_GAIN, 0.5)
+            ## exposure
+            #self.stream.set(cv2.CAP_PROP_EXPOSURE, 0.5)
+            
+            
+            
             if not self.stream.isOpened():
                 raise RuntimeError("Could not open camera.")
             else:

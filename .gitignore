@@ -1,4 +1,4 @@
-.env/
+.env
 .venv/
 server.pid
 restart.flag

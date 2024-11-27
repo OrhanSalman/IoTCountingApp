@@ -8,19 +8,12 @@ import SectionImages from "../sections/SectionImages";
 import { DeviceContext } from "../../../api/DeviceContext";
 import runCommand from "../../../api/runCommand";
 import { getSystemSettings } from "../../../api/apiSystemSettings";
-
+import { PlayCircleOutlined } from "@ant-design/icons";
 const { Panel } = Collapse;
 
 const ConfigView = () => {
-  const {
-    data,
-    health,
-    fetchHealth,
-    loading,
-    fetchImage,
-    fetchSimulations,
-    //fetchSimulationImages,
-  } = useContext(DeviceContext);
+  const { data, health, fetchHealth, loading, fetchImage, fetchSimulations } =
+    useContext(DeviceContext);
   const [blurHumans, setBlurHumans] = useState(true);
   const [customInferenceLoading, setCustomInferenceLoading] = useState(false);
 
@@ -96,6 +89,7 @@ const ConfigView = () => {
         >
           Testläufe
           <div>
+            {/*
             <Button
               type="default"
               loading={loading}
@@ -108,7 +102,9 @@ const ConfigView = () => {
             >
               {loading ? "Hole Snap..." : "Neues Bild"}
             </Button>
+            */}
             <Button
+              icon={<PlayCircleOutlined />}
               type="primary"
               onClick={(e) => {
                 setCustomInferenceLoading(true);

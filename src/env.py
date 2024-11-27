@@ -3,12 +3,12 @@ from dotenv import load_dotenv, set_key
 
 def manage_env_variable(var_name, new_value, env_file='.env'):
     """
-    Checks if a .env file exists. 
-    If not, it creates one and sets the environment variable.
+    Überprüft, ob eine .env-Datei existiert. 
+    Wenn nicht, wird sie erstellt und die Umgebungsvariable gesetzt.
     
-    :param var_name: Name of the environment variable
-    :param new_value: Value to set the environment variable to
-    :param env_file: Path to the .env file
+    :param var_name: Name der Umgebungsvariable
+    :param new_value: Wert, auf den die Umgebungsvariable gesetzt werden soll
+    :param env_file: Pfad zur .env-Datei
     """
     if not os.path.exists(env_file):
         with open(env_file, 'w') as f:

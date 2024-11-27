@@ -1,13 +1,13 @@
 from bson import ObjectId
 import datetime
 
-# ONLY FOR COUNTS
+# NUR FÜR COUNTS
 def parse_topics_and_payloads(json_data_list):
     """
-    Processes the JSON data and returns the topics and payloads.
+    Verarbeitet die JSON-Daten und gibt die Themen und Payloads zurück.
 
-    :param json_data_list: list, a list of dictionaries with the input data in JSON format
-    :return: dict, the topics and their associated payloads
+    :param json_data_list: list, eine Liste von Dictionaries mit den Eingabedaten im JSON-Format
+    :return: dict, die Themen und ihre zugehörigen Payloads
     """
     
     all_payloads = {} 
@@ -15,7 +15,7 @@ def parse_topics_and_payloads(json_data_list):
     for json_data in json_data_list:
 
         record_id = json_data["_id"]
-        timestamp = json_data["timestamp"].isoformat() + 'Z'  # InfluxDB-compatible format
+        timestamp = json_data["timestamp"].isoformat() + 'Z'  # InfluxDB-kompatibles Format
 
         topics = set()
         payloads = {}
@@ -25,10 +25,10 @@ def parse_topics_and_payloads(json_data_list):
                 continue
             
             for direction in json_data[roi]:
-                # Combine ROI and direction
+                # Kombiniere ROI und Richtung
                 base_topic = f"{roi}/{direction}"
                 
-                # Count visitors in the IN and OUT categories
+                # Zähle die Besucher in den IN- und OUT-Kategorien
                 for category in ["IN", "OUT"]:
                     visitors = json_data[roi][direction].get(category, {})
                     for visitor_type, count in visitors.items():
@@ -48,35 +48,36 @@ def parse_topics_and_payloads(json_data_list):
                 all_payloads[topic]["IN"] += payload["IN"]
                 all_payloads[topic]["OUT"] += payload["OUT"]
 
-    return all_payloads
 
+    return all_payloads
 
 
 def parse_topics_and_payloads_from_queue(queue_data):
     """
-    Processes the queue data and returns the topics and payloads.
+    Verarbeitet die Warteschlangen-Daten und gibt die Themen und Payloads zurück.
 
-    :param queue_data: list, a list of dictionaries with the input data in JSON format
-    :return: dict, the topics and their associated payloads
+    :param queue_data: list, eine Liste von Dictionaries mit den Eingabedaten im JSON-Format
+    :return: dict, die Themen und ihre zugehörigen Payloads
     """
     
     all_payloads = {}
 
-    # Iterate over each element in queue_data
+    # Iteriere über jedes Element in queue_data
     for data in queue_data:
         for region_name, directions in data.items():
             for direction, counts in directions.items():
                 for category in ["IN", "OUT"]:
                     visitor_types = counts.get(category, {}) 
                     for visitor_type, count in visitor_types.items():
-                        # Create the topic
+                        # Erstelle das Thema
                         topic = f"{region_name}/{direction}/{visitor_type}"
                         
-                        # Create the payload for each topic
-                        if topic not in all_payloads:
+                        # Erstelle den Payload für jedes Topic          # TODO: dieses timestamp ist nicht der Zeitraum der Erfassung, sondern der Zeitpunkt des Speicherns in Mongo
+                        if topic not in all_payloads:                   # TODO: dieses timestamp benötigen wir hier nicht...
                             all_payloads[topic] = {"IN": 0, "OUT": 0, "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat() + 'Z'}
                         
-                        # Update the payload for the current topic
+                        # Aktualisiere den Payload für das aktuelle Topic
                         all_payloads[topic][category] += count
 
     return all_payloads
+
