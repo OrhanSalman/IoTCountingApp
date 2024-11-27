@@ -28,3 +28,4 @@ test.webm
 mongo_config/
 mongo_data/
 runs/
+.DS_Store

@@ -12,17 +12,6 @@ from hypercorn.config import Config
 from hypercorn.asyncio import serve
 from src.utils.tools import daily_restart, load_config
 
-#import ssl
-#
-#try:
-#    _create_unverified_https_context = ssl._create_unverified_context
-#except AttributeError:
-#    # Legacy Python that doesn't verify HTTPS certificates by default
-#    pass
-#else:
-#    # Handle target environment that doesn't support HTTPS verification
-#    ssl._create_default_https_context = _create_unverified_https_context
-
 cleanup_done = False
 
 logger = Logger("Main", settings.LOG_PATH + "/main.log")
@@ -65,7 +54,7 @@ def initialize_services():
 # Konfiguration für Hypercorn
 config = Config()
 config.bind = [f"0.0.0.0:{settings.APP_PORT}"]
-config.workers = 1
+config.workers = 1 # Leave it as it is
 config.read_timeout = 60
 config.startup_timeout = 60
 config.shutdown_timeout = 60
