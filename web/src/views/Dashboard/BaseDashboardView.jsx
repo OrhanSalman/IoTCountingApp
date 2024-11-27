@@ -359,10 +359,10 @@ const BaseDashboardView = () => {
                 Inferenz aktiv seit:{" "}
                 {health?.inference?.details?.init_time || "--.--.----"}
               </p>
-              {/*<p>Warteschlange: {health?.inference?.queue_size}</p>>*/}
+              <p>Warteschlange: {health?.inference?.queue_size}</p>
               {/*<p>2.1. Anzahl gezählter Objekte</p>*/}
               {/*<p>2.2. Zeiten durchschnittlich</p>*/}
-              <p>2.3. Routen</p>
+              {/*<p>2.3. Routen</p>*/}
             </Card>
           </Col>
 
