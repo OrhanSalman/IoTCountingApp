@@ -4,6 +4,6 @@ runs/*
 .venv/*
 mongo_data/*
 mongo_config/*
-#yolov*
-#yolo*
+yolov*
+yolo*
 #.env

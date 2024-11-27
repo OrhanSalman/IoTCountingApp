@@ -180,17 +180,18 @@ const CustomHeader = ({ activeNavKey, onNavChange }) => {
         {isMobile ? "" : user?.preferred_username || ""}
       </p>
 
-      {user && user.length > 0 && (
-        <Tooltip title="Logout">
-          <Button
-            type="text"
-            icon={<LogoutOutlined />}
-            style={{ color: "white", marginLeft: "8px" }} // Margin anpassen
-            size={{ xs: "small", sm: "middle" }}
-            onClick={handleLogout}
-          />
-        </Tooltip>
-      )}
+      {user &&
+        user.message !== "OIDC not configured." && ( // poor
+          <Tooltip title="Logout">
+            <Button
+              type="text"
+              icon={<LogoutOutlined />}
+              style={{ color: "white", marginLeft: "8px" }}
+              size={{ xs: "small", sm: "middle" }}
+              onClick={handleLogout}
+            />
+          </Tooltip>
+        )}
     </Header>
   );
 };
