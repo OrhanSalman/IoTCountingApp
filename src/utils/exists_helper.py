@@ -1,6 +1,6 @@
 from src.core.clients.mongo import MongoDB
 from src.core.clients.mqtt import MQTTClient
-from src.core.yolo.queuemanager import QueueManager
+from src.core.inference.queuemanager import QueueManager
 
 
 def check_mongo_client_exists():

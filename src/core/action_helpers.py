@@ -1,6 +1,6 @@
 
 import threading
-from src.core.yolo.exporter import export
+from src.core.inference.exporter import export
 from src.utils.logger import Logger
 
 

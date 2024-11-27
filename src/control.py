@@ -15,9 +15,9 @@ from src.core.clients.mqtt import MQTTClient
 from src.core.stream.ffmpeg import conversion_in_progress, is_conversion_in_progress
 from src.core.stream.pafy_live import StreamCatcher
 from src.core.stream.stream_solution import StreamSolution
-from src.core.yolo.benchmark import ModelBenchmark
-from src.core.yolo.inference import Inference
-from src.core.yolo.queuemanager import QueueManager
+from src.core.inference.benchmark import ModelBenchmark
+from src.core.inference.inference import Inference
+from src.core.inference.queuemanager import QueueManager
 from src.utils.custom_process import CustomProcess
 from src.utils.logger import Logger
 from src.utils.messyFunctions import convert_to_seconds, whereModel
