@@ -6,33 +6,27 @@ import {
   Row,
   InputNumber,
   Col,
-  Typography,
+  //Typography,
   Card,
   Button,
   Checkbox,
-  Radio,
   Drawer,
   Tooltip,
   Modal,
   Divider,
 } from "antd";
-import {
-  PlayCircleOutlined,
-  FilterOutlined,
-  UploadOutlined,
-} from "@ant-design/icons";
+import { PlayCircleOutlined, FilterOutlined } from "@ant-design/icons";
 import { DeviceContext } from "../../../api/DeviceContext";
 import { EyeOutlined, SaveOutlined } from "@ant-design/icons";
 import runCommand from "../../../api/runCommand";
 import { getSystemSettings } from "../../../api/apiSystemSettings";
 import baseURL from "../../../api/baseUrl";
-import SplitterComponent from "../components/SplitterComponent";
+//import SplitterComponent from "../components/SplitterComponent";
 
-const { Title } = Typography;
-const { Text } = Typography;
+//const { Title } = Typography;
+//const { Text } = Typography;
 
 const SimulationView = () => {
-  const [splitter, setSplitter] = useState(0);
   const [customInferenceLoading, setCustomInferenceLoading] = useState(false);
   const { health, simulations, fetchSimulations, fetchHealth } =
     useContext(DeviceContext);

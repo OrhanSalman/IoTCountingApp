@@ -1,8 +1,7 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext } from "react";
 import {
   Layout,
   Menu,
-  Space,
   Button,
   Tooltip,
   Modal,
@@ -50,7 +49,7 @@ const iconMenuItems = [
 ];
 
 const CustomHeader = ({ activeNavKey, onNavChange }) => {
-  const { data, user } = useContext(DeviceContext);
+  const { user } = useContext(DeviceContext);
 
   const logout = useHandleLogout();
   const isMobile = useIsMobile();
@@ -106,92 +105,99 @@ const CustomHeader = ({ activeNavKey, onNavChange }) => {
         width: "100%",
         height: "60px",
         display: "flex",
+        justifyContent: "space-between",
         alignItems: "center",
         backgroundColor: "#001529",
         padding: "0 16px",
       }}
     >
-      {/*
+      {/* Linker Bereich */}
+      <div style={{ flex: 1, textAlign: "left" }}>
+        {isMobile && (
+          <Dropdown
+            overlay={menu}
+            onOpenChange={setDropdownVisible}
+            open={dropdownVisible}
+            trigger={["click"]}
+          >
+            <Button type="text" style={{ color: "white" }}>
+              <AppstoreOutlined style={{ fontSize: 20 }} />
+            </Button>
+          </Dropdown>
+        )}
+      </div>
+
+      {/* Mittlerer Bereich */}
+      <div style={{ flex: 2, textAlign: "center" }}>
+        {!isMobile && (
+          <Menu
+            theme="dark"
+            mode="horizontal"
+            selectedKeys={[activeNavKey]}
+            onClick={onNavChange}
+            style={{
+              lineHeight: "40px",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "transparent",
+            }}
+            items={iconMenuItems.map((item) => ({
+              key: item.key,
+              icon: item.icon,
+              label: (
+                <NavLink
+                  to={item.path}
+                  style={({ isActive }) => ({
+                    color: isActive ? "white" : "white",
+                    padding: "5px",
+                  })}
+                >
+                  {item.title}
+                  {item?.badge && (
+                    <Badge size="small" count={5} offset={[5, -15]} />
+                  )}
+                </NavLink>
+              ),
+            }))}
+          />
+        )}
+      </div>
+
+      {/* Rechter Bereich */}
       <div
         style={{
-          color: "white",
-          fontWeight: "bold",
-          fontSize: isMobile ? "16px" : "20px",
-          whiteSpace: "nowrap",
-          textOverflow: "ellipsis",
-          overflow: "hidden",
-          maxWidth: "50%",
-          marginRight: "auto",
+          flex: 1,
+          display: "flex",
+          justifyContent: "flex-end",
+          alignItems: "center",
+          gap: "8px",
         }}
       >
-        {" "}
-      </div>
-      */}
-
-      {isMobile ? (
-        <Dropdown
-          overlay={menu}
-          onOpenChange={setDropdownVisible}
-          open={dropdownVisible}
-          trigger={["click"]}
-        >
-          <Button type="text" style={{ color: "white", marginLeft: "auto" }}>
-            <AppstoreOutlined style={{ fontSize: 20 }} />
-          </Button>
-        </Dropdown>
-      ) : (
-        <Menu
-          theme="dark"
-          mode="horizontal"
-          selectedKeys={[activeNavKey]}
-          onClick={onNavChange}
+        <p
           style={{
-            lineHeight: "40px",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            flex: 1,
-            backgroundColor: "transparent",
+            color: "white",
+            fontSize: 15,
+            fontWeight: "bold",
+            margin: 0,
+            whiteSpace: "nowrap",
           }}
-          items={iconMenuItems.map((item) => ({
-            key: item.key,
-            icon: item.icon,
-            label: (
-              <NavLink
-                to={item.path}
-                style={({ isActive }) => ({
-                  color: isActive ? "white" : "white",
-                  padding: "5px",
-                })}
-              >
-                {item.title}
-                {item?.badge && (
-                  <Badge size="small" count={5} offset={[5, -15]} />
-                )}
-              </NavLink>
-            ),
-          }))}
-        />
-      )}
+        >
+          {user?.preferred_username || ""}
+        </p>
 
-      <p
-        style={{ color: "white", fontSize: 15, fontWeight: "bold", margin: 0 }}
-      >
-        {isMobile ? "" : user?.preferred_username || ""}
-      </p>
-
-      {user &&
-        user.message !== "OIDC not configured." && ( // poor
+        {user && user.message !== "OIDC not configured." && (
           <Tooltip title="Logout">
             <Button
               type="text"
               icon={<LogoutOutlined />}
-              style={{ color: "white", marginLeft: "8px" }}
+              style={{ color: "white" }}
               size={{ xs: "small", sm: "middle" }}
               onClick={handleLogout}
             />
           </Tooltip>
         )}
+      </div>
     </Header>
   );
 };

@@ -1,6 +1,5 @@
-import React, { useEffect, useState, useContext } from "react";
-import { Tooltip, Row, Divider } from "antd";
-import { QuestionCircleOutlined } from "@ant-design/icons";
+import React, { useState, useContext } from "react";
+import { Row } from "antd";
 import { useUpdateHandler } from "./hooks/updateHandler";
 import CardWithTree from "./components/CardWithTree";
 import { categories } from "../../../../src/constants/constants";

@@ -10,7 +10,6 @@ capture.jpg
 *.pyc
 *.npy
 datasets/
-data/
 logs/
 vids/
 imgs/

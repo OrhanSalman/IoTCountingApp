@@ -76,40 +76,40 @@ The frontend was created with **React** and is served by **Flask**.
 
 ## Environment Variables
 
-| **Variable**          | **Default**                                         | **Description**                                  |
-| --------------------- | --------------------------------------------------- | ------------------------------------------------ |
-| `ULTRALYTICS_VERSION` | `8.3.6`                                             | Version of the Ultralytics framework.            |
-| `APP_DOMAIN`          | `http://0.0.0.0:8080`                               | Domain where the application is accessible.      |
-| `APP_PORT`            | `8080`                                              | Port on which the application runs.              |
-| `BENCHED`             | `False`                                             | Whether the initial benchmark was executed.      |
-| `APP_REDIS_SERVER`    | `True`                                              | Indicates whether Redis is used as a service.    |
-| `REDIS_HOST`          | `redis`                                             | Host address of the Redis server.                |
-| `REDIS_PORT`          | `6379`                                              | Port of the Redis server.                        |
-| `APP_DEV_MODE`        | `False`                                             | Debugging mode.                                  |
-| `ALLOWED_ORIGINS`     | `https://first_origin.com,http://second_origin.com` | List of allowed origins for CORS requests.       |
-| `SECRET_KEY`          | `secrets.token_urlsafe(16)`                         | Secret key for the application.                  |
-| `ENCRYPTION_KEY`      | `secrets.token_urlsafe(32)`                         | Key for data encryption.                         |
-| `USE_OIDC`            | `False`                                             | Indicates whether OpenID Connect (OIDC) is used. |
+| **Variable**          | **Default**                                         |
+| --------------------- | --------------------------------------------------- |
+| `ULTRALYTICS_VERSION` | `8.3.6`                                             |
+| `APP_DOMAIN`          | `http://0.0.0.0:8080`                               |
+| `APP_PORT`            | `8080`                                              |
+| `BENCHED`             | `False`                                             |
+| `APP_REDIS_SERVER`    | `True`                                              |
+| `REDIS_HOST`          | `redis`                                             |
+| `REDIS_PORT`          | `6379`                                              |
+| `APP_DEV_MODE`        | `False`                                             |
+| `ALLOWED_ORIGINS`     | `https://first_origin.com,http://second_origin.com` |
+| `SECRET_KEY`          | `secrets.token_urlsafe(16)`                         |
+| `ENCRYPTION_KEY`      | `secrets.token_urlsafe(32)`                         |
+| `USE_OIDC`            | `False`                                             |
 
 If **USE_OIDC** is enabled, the following variables must be set:
 
-| **Variable**                   | **Default**                                                     | **Description**                          |
-| ------------------------------ | --------------------------------------------------------------- | ---------------------------------------- |
-| `OIDC_CLIENT_ID`               | `<CLIENT_ID>`                                                   | Client ID for OIDC authentication.       |
-| `OIDC_CLIENT_SECRET`           | `xxxxxxxxxxxxxxx`                                               | Client secret for OIDC.                  |
-| `OIDC_HOST`                    | `https://your_keycloak_server.com`                              | Host for the OIDC provider.              |
-| `OIDC_REALM_NAME`              | `<REALM_NAME>`                                                  | Name of the OIDC realm.                  |
-| `OIDC_CERT_URL`                | `/realms/<REALM_NAME>/protocol/openid-connect/certs`            | URL for the OIDC provider's certificate. |
-| `OIDC_TOKEN_URL`               | `/realms/<REALM_NAME>/protocol/openid-connect/token`            | URL for the OIDC token endpoint.         |
-| `OIDC_AUTH_URI`                | `/realms/<REALM_NAME>/protocol/openid-connect/auth`             | Authentication URI for OIDC.             |
-| `OIDC_TOKEN_URI`               | `/realms/<REALM_NAME>/protocol/openid-connect/token`            | Token URI for OIDC.                      |
-| `OIDC_ISSUER`                  | `/realms/<REALM_NAME>`                                          | OIDC issuer URL.                         |
-| `OIDC_REDIRECT_URI`            | `/oidc_callback`                                                | Redirect URI after OIDC authentication.  |
-| `OIDC_USERINFO_URI`            | `/realms/<REALM_NAME>/protocol/openid-connect/userinfo`         | URI for OIDC user info.                  |
-| `OIDC_TOKEN_INTROSPECTION_URI` | `/realms/<REALM_NAME>/protocol/openid-connect/token/introspect` | URI for token introspection in OIDC.     |
-| `OIDC_SERVER_METADATA_URL`     | `/realms/<REALM_NAME>/.well-known/openid-configuration`         | URL for OIDC server metadata.            |
-| `OIDC_ALLOWED_ROLES`           | `admin`                                                         | Allowed roles for OIDC authentication.   |
-| `OIDC_SCOPES`                  | `openid,email,profile`                                          | Requested scopes for OIDC.               |
+| **Variable**                   | **Default**                                                     |
+| ------------------------------ | --------------------------------------------------------------- |
+| `OIDC_CLIENT_ID`               | `<CLIENT_ID>`                                                   |
+| `OIDC_CLIENT_SECRET`           | `xxxxxxxxxxxxxxx`                                               |
+| `OIDC_HOST`                    | `https://your_keycloak_server.com`                              |
+| `OIDC_REALM_NAME`              | `<REALM_NAME>`                                                  |
+| `OIDC_CERT_URL`                | `/realms/<REALM_NAME>/protocol/openid-connect/certs`            |
+| `OIDC_TOKEN_URL`               | `/realms/<REALM_NAME>/protocol/openid-connect/token`            |
+| `OIDC_AUTH_URI`                | `/realms/<REALM_NAME>/protocol/openid-connect/auth`             |
+| `OIDC_TOKEN_URI`               | `/realms/<REALM_NAME>/protocol/openid-connect/token`            |
+| `OIDC_ISSUER`                  | `/realms/<REALM_NAME>`                                          |
+| `OIDC_REDIRECT_URI`            | `/oidc_callback`                                                |
+| `OIDC_USERINFO_URI`            | `/realms/<REALM_NAME>/protocol/openid-connect/userinfo`         |
+| `OIDC_TOKEN_INTROSPECTION_URI` | `/realms/<REALM_NAME>/protocol/openid-connect/token/introspect` |
+| `OIDC_SERVER_METADATA_URL`     | `/realms/<REALM_NAME>/.well-known/openid-configuration`         |
+| `OIDC_ALLOWED_ROLES`           | `admin`                                                         |
+| `OIDC_SCOPES`                  | `openid,email,profile`                                          |
 
 Keycloak settings:
 
@@ -120,7 +120,6 @@ Some OIDC variables listed here are not used yet.
 
 ## Getting Started
 
-- Debian based (Ubuntu 22.04 or Bookworm)
 - Python 3.11.x
 - Docker and Compose Plugin
 - Picamera2 or USB Webcam

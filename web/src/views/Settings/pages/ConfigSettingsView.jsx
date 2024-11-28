@@ -1,16 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
-import {
-  Switch,
-  Row,
-  Col,
-  Button,
-  Divider,
-  message,
-  Form,
-  Typography,
-  Select,
-  InputNumber,
-} from "antd";
+import { Button, Divider, message, Form, Typography } from "antd";
 import {
   getSystemSettings,
   postSystemSettings,

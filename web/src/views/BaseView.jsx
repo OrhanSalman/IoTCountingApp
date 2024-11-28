@@ -15,10 +15,10 @@ import BaseNotifcationsView from "./Notifications/BaseNotifcationsView";
 import BaseSettingsView from "./Settings/BaseSettingsView";
 import LoadingOverlay from "./LoadingOverlay";
 import { DeviceContext } from "../api/DeviceContext";
-import CustomFooter from "./components/Footer";
+//import CustomFooter from "./components/Footer";
 import CustomHeader from "./components/Header";
 import StatusBar from "./components/StatusBar";
-import useIsMobile from "../useIsMobile";
+//import useIsMobile from "../useIsMobile";
 
 const { Content } = Layout;
 
@@ -76,7 +76,7 @@ const iconMenuItems = [
 ];
 
 const BaseView = () => {
-  const isMobile = useIsMobile();
+  //const isMobile = useIsMobile();
   const { loading, fetchConfig, fetchHealth } = useContext(DeviceContext);
   const [activeNavKey, setActiveNavKey] = useState("home");
   const location = useLocation();
