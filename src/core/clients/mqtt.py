@@ -39,7 +39,7 @@ class MQTTClient:
         # Callbacks
         self.client.on_connect = self.on_connect
         #self.client.on_disconnect = self.on_disconnect
-        #self.client.on_message = self.on_message
+        #self.client.on_message = self.on_message # TODO:
         self.client.on_connect_fail = self.on_connect_fail
 
 
@@ -210,7 +210,7 @@ class MQTTClient:
                 from src.control import mongo_client, queue_manager
 
                 if not self.is_connected():
-                    logger.warning("Cannot work for publishing data. MQTT client is not connected.")
+                    #logger.warning("Cannot work for publishing data. MQTT client is not connected.")
                     continue
                 # Vorrang haben temporäre Daten aus der Queue
                 elif not queue_manager.is_queue_empty():
@@ -218,10 +218,10 @@ class MQTTClient:
                     self.publish_from_queue()
                     continue
                 elif not isinstance(mongo_client, MongoDB):
-                    logger.warning("Cannot get unpublished data. No MongoDB instance provided.")
+                    #logger.warning("Cannot get unpublished data. No MongoDB instance provided.")
                     continue
                 elif not hasattr(mongo_client, "is_connected") and mongo_client.is_connected():
-                    logger.warning("Cannot get unpublished data. MongoDB client is not connected.")
+                    #logger.warning("Cannot get unpublished data. MongoDB client is not connected.")
                     continue
                 else:
                     self.publish_from_mongo()

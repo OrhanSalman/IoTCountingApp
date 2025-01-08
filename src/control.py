@@ -64,12 +64,6 @@ def start_stream(only_simulation=False):
     global stream, error, bench_process, pafy_live
     error = None
 
-    # Weg, da sonst youtube nicht funktioniert
-    #cam_solution = load_config(settings.CAM_SOLUTIONS_PATH)
-    #if not cam_solution.get("cv2", False) and not cam_solution.get("picam2", False):
-    #    error = "No camera stream solution available."
-    #    logger.error(error)
-    #    return False, error 
     if stream is None:
         data = load_config(settings.CONFIG_PATH)
         youtube = False
@@ -803,7 +797,6 @@ def restart_server():
         logger.error(error)
         return False, error
 
-# TODO: timing problem, das bild ist nicht blurred oder regionen nicht sichtbar, raspi zu langsam
 def get_last_inference_frame():
     global inference
     if inference is not None:

@@ -406,7 +406,7 @@ class Inference:
             model = YOLO(self.model_str)
             
             if self.only_simulation_img: # TODO: blur_humans funktioniert hier nicht
-                print(os.getcwd())
+
                 if not os.path.exists(settings.YOLO_PREDICTIONS_PATH):
                     os.makedirs(settings.YOLO_PREDICTIONS_PATH)
                 shutil.rmtree(settings.YOLO_PREDICTIONS_PATH)

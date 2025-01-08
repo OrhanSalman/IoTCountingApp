@@ -192,7 +192,7 @@ const BaseDashboardView = () => {
           .catch((error) => {
             console.error("Fetch error:", error);
           });
-      }, 5000);
+      }, 3000);
 
       return () => clearInterval(interval);
     }

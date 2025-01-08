@@ -1,7 +1,12 @@
 import React from "react";
+import NotImplemented from "../../NotImplemented";
 
 const TimesView = () => {
-  return <div>TimesView</div>;
+  return (
+    <div>
+      <NotImplemented />
+    </div>
+  );
 };
 
 export default TimesView;
