@@ -28,9 +28,9 @@ MONGO_COLLECTION_TIMES = os.getenv("MONGO_COLLECTION_TIMES", "times")
 BENCHED = os.getenv("BENCHED", "False").lower() == "true"
 
 SECRET_KEY = os.getenv("SECRET_KEY", secrets.token_urlsafe(16))
-print(f"SECRET_KEY war nicht gesetzt, wurde generiert: {SECRET_KEY}") if not os.getenv("SECRET_KEY") else None
+#print(f"SECRET_KEY war nicht gesetzt, wurde generiert: {SECRET_KEY}") if not os.getenv("SECRET_KEY") else None
 ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY", secrets.token_urlsafe(32))
-print(f"ENCRYPTION_KEY war nicht gesetzt, wurde generiert: {ENCRYPTION_KEY}") if not os.getenv("ENCRYPTION_KEY") else None
+#print(f"ENCRYPTION_KEY war nicht gesetzt, wurde generiert: {ENCRYPTION_KEY}") if not os.getenv("ENCRYPTION_KEY") else None
 
 
 # Umgebungsvariablen laden

@@ -749,11 +749,14 @@ def start_mqtt_client():
 
         mqtt_client = MQTTClient(dataendpoint, counts_publish_intervall, topics, authEnabled, client_id, host, port, username, password, tls, willMsg, qos, cleanSession, keepalive)
         status, msg = mqtt_client.start()
+        print(status)
+        print(msg)
         mqtt_ready_event.set()
 
     mqtt_thread_instance = threading.Thread(target=mqtt_thread, daemon=True, name="MQTT")
     mqtt_thread_instance.start()
     mqtt_ready_event.wait()
+
     
     return status, msg
 
