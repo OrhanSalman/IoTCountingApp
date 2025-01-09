@@ -87,7 +87,8 @@ class Inference:
         self.regions = self.build_regions(DATA["deviceRois"]) if self.hasRegions else None
         
         # VALIDATION
-        self.validate_regions()
+        if not self.only_simulation_img:
+            self.validate_regions()
 
         # Load system settings
         SYSTEM_SETTINGS = load_config(settings.SYSTEM_SETTINGS_PATH)
@@ -405,6 +406,7 @@ class Inference:
             model = YOLO(self.model_str)
             
             if self.only_simulation_img: # TODO: blur_humans funktioniert hier nicht
+
                 if not os.path.exists(settings.YOLO_PREDICTIONS_PATH):
                     os.makedirs(settings.YOLO_PREDICTIONS_PATH)
                 shutil.rmtree(settings.YOLO_PREDICTIONS_PATH)
@@ -436,6 +438,7 @@ class Inference:
                 else:
                     logger.error("Predicted frame does not exist.")
                 return True
+            
             
             if not self.only_simulation:
                 if check_mongo_client_exists():
@@ -743,7 +746,7 @@ class Inference:
 
 # Testzwecke
 if __name__ == "__main__":
-    # ().venv) orhan@MacBook-Pro-von-Orhan IoTApp_DjangoReact % PYTHONPATH=. python -m kernprof -lvr src/core/yolo/inference.py
+    # PYTHONPATH=. python -m kernprof -lvr src/core/yolo/inference.py
     from src.core.stream.cv2.stream_cv2 import CameraStream
     stream = CameraStream("test.webm", (1280, 720), 30, "RGB888")
     stream.start_camera()

@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Collapse, Button, message } from "antd";
+import { Collapse, Button } from "antd";
 import SectionInference from "../sections/SectionInference";
 //import SectionBenchmark from "../sections/SectionBenchmark";
 import SectionVideo from "../sections/SectionVideo";
@@ -12,16 +12,15 @@ import { PlayCircleOutlined } from "@ant-design/icons";
 const { Panel } = Collapse;
 
 const ConfigView = () => {
-  const { data, health, fetchHealth, loading, fetchImage, fetchSimulations } =
-    useContext(DeviceContext);
+  const { health, fetchSimulations } = useContext(DeviceContext);
   const [blurHumans, setBlurHumans] = useState(true);
   const [customInferenceLoading, setCustomInferenceLoading] = useState(false);
 
-  const [simulationState, setSimulationState] = useState(false);
+  //const [simulationState, setSimulationState] = useState(false);
 
-  const fetchDeviceImage = async () => {
-    await fetchImage(true);
-  };
+  //const fetchDeviceImage = async () => {
+  //  await fetchImage(true);
+  //};
 
   useEffect(() => {
     const fetchSystemSettings = async () => {

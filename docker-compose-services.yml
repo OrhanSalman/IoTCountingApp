@@ -14,9 +14,9 @@ services:
     command: --bind 0.0.0.0 --port ${REDIS_PORT}
     networks:
       - monitoring
-    environment:
-      - REDIS_HOST=${REDIS_HOST}
-      - REDIS_PORT=${REDIS_PORT}
+    #environment:
+    #  - REDIS_HOST=${REDIS_HOST}
+    #  - REDIS_PORT=${REDIS_PORT}
     ports:
       - "${REDIS_PORT}:${REDIS_PORT}"
 

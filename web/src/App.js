@@ -6,7 +6,6 @@ import {
   Navigate,
 } from "react-router-dom";
 import BaseView from "./views/BaseView";
-import DashboardView from "./views/Dashboard/DashboardView";
 import BaseDataView from "./views/Data/BaseDataView";
 import BaseInferenceView from "./views/Inference/BaseInferenceView";
 import BaseNotifcationsView from "./views/Notifications/BaseNotifcationsView";
@@ -23,7 +22,6 @@ const App = () => {
       <DeviceProvider>
         <BaseView>
           <Routes>
-            <Route path="/" element={<DashboardView />} />
             <Route path="/data/*" element={<BaseDataView />}>
               {/* TODO: */}
               <Route path="/data/counts" element={<CountsView />} />

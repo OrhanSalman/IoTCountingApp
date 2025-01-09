@@ -8,7 +8,7 @@ import {
 } from "@ant-design/icons";
 import { DeviceContext } from "../../api/DeviceContext";
 import baseUrl from "../../api/baseUrl";
-import useIsMobile from "../../useIsMobile";
+//import useIsMobile from "../../useIsMobile";
 
 const BaseDashboardView = () => {
   const { data, health } = useContext(DeviceContext);
@@ -192,7 +192,7 @@ const BaseDashboardView = () => {
           .catch((error) => {
             console.error("Fetch error:", error);
           });
-      }, 5000);
+      }, 3000);
 
       return () => clearInterval(interval);
     }

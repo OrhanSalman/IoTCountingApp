@@ -39,7 +39,7 @@ class MQTTClient:
         # Callbacks
         self.client.on_connect = self.on_connect
         #self.client.on_disconnect = self.on_disconnect
-        #self.client.on_message = self.on_message
+        self.client.on_message = self.on_message # TODO:
         self.client.on_connect_fail = self.on_connect_fail
 
 
@@ -192,15 +192,36 @@ class MQTTClient:
 
     def publish(self, topic, message, qos, retain=False):
         try:
+
+            message = json.dumps(message)
+
+            # check if is valid json format
+            try:
+                json.loads(message)
+            except ValueError as e:
+                error = f"Invalid JSON format: {e}"
+                logger.error(error)
+                return False, error
+
             self.client.publish(topic, message, qos, retain)
             info = f"Published message: {message} to topic: {topic} with QoS {qos}"
-            #logger.info(info)
+            logger.info(info)
             self.published_messages_since_start += 1
             return True, info
         except Exception as e:
             error = f"Failed to publish message: {e}"
             logger.error(error)
             return False, error
+
+    def prepare_final_topic(self, topic):
+        final_topic = self.dataendpoint
+        placeholders = final_topic.split("/")
+        topic_parts = topic.split("/")
+        for i, placeholder in enumerate(placeholders):
+            if placeholder == "+":
+                placeholders[i] = topic_parts.pop(0)
+        final_topic = "/".join(placeholders)
+        return final_topic
 
 
     def publish_counts(self):
@@ -210,7 +231,7 @@ class MQTTClient:
                 from src.control import mongo_client, queue_manager
 
                 if not self.is_connected():
-                    logger.warning("Cannot work for publishing data. MQTT client is not connected.")
+                    #logger.warning("Cannot work for publishing data. MQTT client is not connected.")
                     continue
                 # Vorrang haben temporäre Daten aus der Queue
                 elif not queue_manager.is_queue_empty():
@@ -218,10 +239,10 @@ class MQTTClient:
                     self.publish_from_queue()
                     continue
                 elif not isinstance(mongo_client, MongoDB):
-                    logger.warning("Cannot get unpublished data. No MongoDB instance provided.")
+                    #logger.warning("Cannot get unpublished data. No MongoDB instance provided.")
                     continue
                 elif not hasattr(mongo_client, "is_connected") and mongo_client.is_connected():
-                    logger.warning("Cannot get unpublished data. MongoDB client is not connected.")
+                    #logger.warning("Cannot get unpublished data. MongoDB client is not connected.")
                     continue
                 else:
                     self.publish_from_mongo()
@@ -254,7 +275,8 @@ class MQTTClient:
                         payloads = parse_topics_and_payloads(unpublished_data)
                         # Veröffentliche die Daten
                         for topic, payload in payloads.items():
-                            self.publish(topic, str(payload), qos=self.qos)
+                            topic = self.prepare_final_topic(topic)
+                            self.publish(topic, payload, qos=self.qos)
                             time.sleep(0.01)
 
                             # TODO: entfernen, wir wollen nur aus der queue veröffentlichen...
@@ -277,7 +299,8 @@ class MQTTClient:
                 payloads = parse_topics_and_payloads_from_queue(unpublished_data)
                 # Veröffentliche die Daten
                 for topic, payload in payloads.items():
-                    self.publish(topic, str(payload), qos=self.qos)
+                    topic = self.prepare_final_topic(topic)
+                    self.publish(topic, payload, qos=self.qos)
                     time.sleep(0.01)
         except Exception as e:
             error = f"Failed to publish data from Queue: {e}"

@@ -1,6 +1,5 @@
 import React from "react";
-import { FrownOutlined } from "@ant-design/icons";
-import { Button, Result } from "antd";
+import { Result } from "antd";
 
 const NotImplemented = () => {
   return (

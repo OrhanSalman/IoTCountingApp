@@ -25,7 +25,6 @@ def parse_topics_and_payloads(json_data_list):
                 continue
             
             for direction in json_data[roi]:
-                # Kombiniere ROI und Richtung
                 base_topic = f"{roi}/{direction}"
                 
                 # Zähle die Besucher in den IN- und OUT-Kategorien
@@ -37,7 +36,8 @@ def parse_topics_and_payloads(json_data_list):
                         topics.add(topic)
                         
                         if topic not in payloads:
-                            payloads[topic] = {"IN": 0, "OUT": 0, "timestamp": timestamp}
+                            #payloads[topic] = {"IN": 0, "OUT": 0, "timestamp": timestamp}
+                            payloads[topic] = {"IN": 0, "OUT": 0}
                         
                         payloads[topic][category] += count
 
@@ -62,21 +62,19 @@ def parse_topics_and_payloads_from_queue(queue_data):
     
     all_payloads = {}
 
-    # Iteriere über jedes Element in queue_data
     for data in queue_data:
         for region_name, directions in data.items():
             for direction, counts in directions.items():
                 for category in ["IN", "OUT"]:
                     visitor_types = counts.get(category, {}) 
                     for visitor_type, count in visitor_types.items():
-                        # Erstelle das Thema
                         topic = f"{region_name}/{direction}/{visitor_type}"
                         
                         # Erstelle den Payload für jedes Topic          # TODO: dieses timestamp ist nicht der Zeitraum der Erfassung, sondern der Zeitpunkt des Speicherns in Mongo
                         if topic not in all_payloads:                   # TODO: dieses timestamp benötigen wir hier nicht...
-                            all_payloads[topic] = {"IN": 0, "OUT": 0, "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat() + 'Z'}
+                            #all_payloads[topic] = {"IN": 0, "OUT": 0, "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat() + 'Z'}
+                            all_payloads[topic] = {"IN": 0, "OUT": 0}
                         
-                        # Aktualisiere den Payload für das aktuelle Topic
                         all_payloads[topic][category] += count
 
     return all_payloads

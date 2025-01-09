@@ -4,13 +4,6 @@
 #set -o pipefail
 #set -o nounset
 
-# Prüfe, ob eine .env-Datei vorhanden ist und lade die Umgebungsvariablen
-#if [ -f .env ]; then
-#  export $(grep -v '^#' .env | grep '=' | xargs)
-#else
-#  echo "No .env file found"
-#fi
-
 
 # server.pid datei löschen falls existiert
 if [ -f "server.pid" ]; then
@@ -33,5 +26,5 @@ source /venv/bin/activate
 
 /restart_server &
 
-# Führe den angegebenen Befehl aus (hier python3 app.py)
+# Führt den angegebenen Befehl aus (hier python3 app.py)
 exec "$@"

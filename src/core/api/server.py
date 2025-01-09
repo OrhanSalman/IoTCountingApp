@@ -28,6 +28,7 @@ encryption_manager = EncryptionManager()
 ALLOWED_ORIGINS = settings.ALLOWED_ORIGINS
 SECRET_KEY = settings.SECRET_KEY
 
+
 app = Flask(__name__, static_folder=settings.BUILD_PATH, static_url_path="/")
 app.debug = settings.APP_DEV_MODE
 app.config['SECRET_KEY'] = SECRET_KEY
@@ -42,7 +43,7 @@ CORS(
     app,
     resources={r"/*": {"origins": ALLOWED_ORIGINS}},
     supports_credentials=True,
-    allow_headers=["Content-Type", "Authorization", "Access-Control-Allow-Origin"]
+    allow_headers=["Content-Type", "Authorization", "Access-Control-Allow-Origin"],
 )
 
 # Authlib OAuth-Setup
@@ -525,7 +526,7 @@ def action():
             'snap': take_snapshot,
             'video': take_video
         },
-        'counting': {
+        'counting': {   # TODO: counting oder inference? siehe MQTT
             'start': start_counting,
             'stop': stop_counting
         },

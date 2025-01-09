@@ -1,5 +1,4 @@
 import json
-import random
 from uuid import uuid4
 
 
@@ -102,6 +101,7 @@ def add_session(session, path):
     with open(path, "w") as file:
         json.dump(session_counter, file, indent=4)
 
+
 def add_end_datetime_to_session(session_id, end_datetime, path):
     with open(path, "r") as file:
         session_counter = json.load(file)
@@ -115,14 +115,12 @@ def add_end_datetime_to_session(session_id, end_datetime, path):
 
 
 def delete_session(session_id, path):
-    # Öffne die JSON-Datei im Lese-Modus
     with open(path, "r") as file:
         session_counter = json.load(file)
         
     # Entferne die Sitzung mit der angegebenen ID
     session_counter["sessions"] = [session for session in session_counter["sessions"] if session["id"] != session_id]
     
-    # Öffne die JSON-Datei im Schreib-Modus, um die Änderungen zu speichern
     with open(path, "w") as file:
-        json.dump(session_counter, file, indent=4)  # Speichere die aktualisierten Daten
+        json.dump(session_counter, file, indent=4)
         

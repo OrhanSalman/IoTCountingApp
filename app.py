@@ -88,10 +88,6 @@ def cleanup():
         logger.error(error)
         return False, error
 
-def signal_handler(sig, frame):
-    logger.info(f"Signal {sig} empfangen, beende Anwendung...")
-    #cleanup()
-    exit(0)
 
 def force_kill():
     """Erzwinge das Beenden des Prozesses mit SIGKILL."""
@@ -113,7 +109,7 @@ def signal_handler(sig, frame):
     logger.info(f"Signal {sig} empfangen, versuche Anwendung zu beenden...")
     success, error_message = cleanup()
     
-    if not success:  # Wenn Bereinigung fehlgeschlagen ist
+    if not success:
         logger.error(f"Aufräumen fehlgeschlagen: {error_message}")
     else:
         logger.info("Anwendung sauber beendet.")

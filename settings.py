@@ -28,11 +28,10 @@ MONGO_COLLECTION_TIMES = os.getenv("MONGO_COLLECTION_TIMES", "times")
 BENCHED = os.getenv("BENCHED", "False").lower() == "true"
 
 SECRET_KEY = os.getenv("SECRET_KEY", secrets.token_urlsafe(16))
-print(f"SECRET_KEY war nicht gesetzt, wurde generiert: {SECRET_KEY}") if not os.getenv("SECRET_KEY") else None
+#print(f"SECRET_KEY war nicht gesetzt, wurde generiert: {SECRET_KEY}") if not os.getenv("SECRET_KEY") else None
 ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY", secrets.token_urlsafe(32))
-print(f"ENCRYPTION_KEY war nicht gesetzt, wurde generiert: {ENCRYPTION_KEY}") if not os.getenv("ENCRYPTION_KEY") else None
-ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "").split(",") if os.getenv("ALLOWED_ORIGINS") else []
-ALLOWED_ORIGINS.append(APP_DOMAIN)
+#print(f"ENCRYPTION_KEY war nicht gesetzt, wurde generiert: {ENCRYPTION_KEY}") if not os.getenv("ENCRYPTION_KEY") else None
+
 
 # Umgebungsvariablen laden
 USE_OIDC = os.getenv("USE_OIDC", "False").lower() == "true"
@@ -55,12 +54,10 @@ OIDC_SERVER_METADATA_URL = f"{OIDC_HOST}{os.getenv('OIDC_SERVER_METADATA_URL')}"
 OIDC_SCOPES = os.getenv("OIDC_SCOPES").split(",") if os.getenv("OIDC_SCOPES") else []
 OIDC_ID_TOKEN_COOKIE_SECURE = True
 
-ALLOWED_ORIGINS.extend([APP_DOMAIN, OIDC_HOST])
-if APP_DEV_MODE:
-    ALLOWED_ORIGINS.append("http://localhost:3000")
-if APP_DOMAIN:
-    ALLOWED_ORIGINS.append(APP_DOMAIN)
-    
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "").split(",") if os.getenv("ALLOWED_ORIGINS") else []
+ALLOWED_ORIGINS.append(APP_DOMAIN)
+ALLOWED_ORIGINS.append(OIDC_HOST) if USE_OIDC else None
+ALLOWED_ORIGINS.append("http://localhost:3000") if APP_DEV_MODE else None
 
 
 # Define paths
@@ -120,8 +117,10 @@ ULTRALYTICS_VERSION = os.getenv("ULTRALYTICS_VERSION", "8.3.6")
 def is_package_installed(package_name, version):
     try:
         pkg_resources.require(f"{package_name}=={version}")
+        print(f"Paket '{package_name}' in Version {version} ist bereits installiert.")
         return True
     except (pkg_resources.DistributionNotFound, pkg_resources.VersionConflict):
+        print(f"Paket '{package_name}' in Version {version} ist nicht installiert.")
         return False
 
 
@@ -163,7 +162,7 @@ from src.utils.tools import load_config
 data = load_config(CONFIG_PATH)
 DEVICE_ID = data.get("id", None)
 
-print("DEVICE ID is NONE") if DEVICE_ID is None else None
+#print("DEVICE ID is NONE") if DEVICE_ID is None else None
 
 # Prüfen, ob eine SESSION_COUNTER existiert
 try:

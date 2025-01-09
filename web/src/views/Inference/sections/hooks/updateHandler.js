@@ -1,6 +1,5 @@
-import { useCallback, useContext, useEffect } from "react";
+import { useCallback, useContext } from "react";
 import { DeviceContext } from "../../../../api/DeviceContext";
-import { message } from "antd";
 
 export const useUpdateHandler = () => {
   const { data, dispatch } = useContext(DeviceContext);

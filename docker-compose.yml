@@ -8,7 +8,6 @@ services:
     env_file:
       - path: .env
     environment:
-      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
       - APP_DOMAIN=${APP_DOMAIN}
       - APP_PORT=${APP_PORT}
       - APP_REDIS_SERVER=${APP_REDIS_SERVER}
@@ -20,7 +19,9 @@ services:
       #- BENCHED=True
       #- SECRET_KEY=${SECRET_KEY}
       #- ENCRYPTION_KEY=${ENCRYPTION_KEY}
-      
+
+      #- ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+
       # Add the following lines to enable OIDC
       #- USE_OIDC=${USE_OIDC}
       #- OIDC_HOST=${OIDC_HOST}

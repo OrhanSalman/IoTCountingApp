@@ -9,11 +9,10 @@ detect_platform() {
   elif [[ $(uname -m) == "armv7l" ]]; then
     echo "arm"     # ARM 32-bit
   else
-    echo "unknown" # Unbekannte Architektur
+    echo "unknown"
   fi
 }
 
-# Architektur erkennen
 PLATFORM=$(detect_platform)
 
 # Umgebungsvariablen oder spezifische Konfigurationen setzen
@@ -62,6 +61,5 @@ case $PLATFORM in
     ;;
 esac
 
-# Ausgabe der gesetzten Umgebungsvariablen
 echo "Using Redis image: $REDIS_IMAGE"
 echo "Using MongoDB image: $MONGODB_IMAGE"

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useContext } from "react";
+import React, { useState, useMemo } from "react";
 import GenericBaseView from "../../constants/GenericBaseView";
 import LogsView from "./pages/LogsView";
 import {
@@ -8,8 +8,6 @@ import {
 } from "@ant-design/icons";
 import { Outlet } from "react-router-dom";
 //import DataControls from "./pages/DataControls";
-
-// TODO: keinen sider, besser mit tabs
 
 // !!! Re-render-Bug fix (rerendering durch timer fetchHealth)
 const LogsComponent = React.memo(({ filter }) => {
