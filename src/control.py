@@ -619,6 +619,7 @@ def send_status():
             'status': benchmark_status
         },
         'video_converter': is_conversion_in_progress(),
+        # TODO: take_video() und take_snapshot() implementieren
         'cpu': cpu,
         'ram': ram,
         'disk': disk,

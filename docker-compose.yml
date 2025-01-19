@@ -1,5 +1,8 @@
 version: "3.8"
 
+volumes:
+  iot_data:
+
 services:
   iot-app:
     image: iot-app:latest
@@ -42,6 +45,7 @@ services:
       #- OIDC_SCOPES=${OIDC_SCOPES}
     privileged: true
     volumes:
+      - iot_data:/iot_data
       - /run/udev:/run/udev:ro
       - /dev/bus/usb:/dev/bus/usb
     networks:

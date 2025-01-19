@@ -15,7 +15,6 @@ detect_platform() {
 
 PLATFORM=$(detect_platform)
 
-# Umgebungsvariablen oder spezifische Konfigurationen setzen
 case $PLATFORM in
   x86_64)
     echo "Detected platform: x86_64"
@@ -24,11 +23,10 @@ case $PLATFORM in
     ;;
   arm64)
     echo "Detected platform: arm64"
-    # Überprüfen der CPU-Architektur und -Features
+
     CPU_INFO=$(lscpu | grep "Architecture" | awk '{print $2}')
     echo "Detected CPU architecture: $CPU_INFO"
 
-    # Überprüfung der ARM-Version (mindestens ARMv8.2-A)
     if [[ "$CPU_INFO" == "aarch64" ]]; then
       # Zusätzliche Überprüfung auf ARMv8.2-A-Features
       ARM_FEATURES=$(lscpu | grep -E "Flags|v8")

@@ -98,28 +98,31 @@ If **USE_OIDC** is enabled, the following variables must be set:
 | `OIDC_CLIENT_ID`               | `<CLIENT_ID>`                                                   |
 | `OIDC_CLIENT_SECRET`           | `xxxxxxxxxxxxxxx`                                               |
 | `OIDC_HOST`                    | `https://your_keycloak_server.com`                              |
+| `OIDC_ISSUER`                  | `/realms/<REALM_NAME>`                                          |
+| `OIDC_USERINFO_URI`            | `/realms/<REALM_NAME>/protocol/openid-connect/userinfo`         |
+| `OIDC_TOKEN_INTROSPECTION_URI` | `/realms/<REALM_NAME>/protocol/openid-connect/token/introspect` |
+| `OIDC_SERVER_METADATA_URL`     | `/realms/<REALM_NAME>/.well-known/openid-configuration`         |
+| `OIDC_SCOPES`                  | `openid,email,profile,offline_access`                          |
+
+As for now following variables are unused:
+| **Variable**                   | **Default**                                                     |
+| ------------------------------ | --------------------------------------------------------------- |
 | `OIDC_REALM_NAME`              | `<REALM_NAME>`                                                  |
 | `OIDC_CERT_URL`                | `/realms/<REALM_NAME>/protocol/openid-connect/certs`            |
 | `OIDC_TOKEN_URL`               | `/realms/<REALM_NAME>/protocol/openid-connect/token`            |
 | `OIDC_AUTH_URI`                | `/realms/<REALM_NAME>/protocol/openid-connect/auth`             |
 | `OIDC_TOKEN_URI`               | `/realms/<REALM_NAME>/protocol/openid-connect/token`            |
-| `OIDC_ISSUER`                  | `/realms/<REALM_NAME>`                                          |
 | `OIDC_REDIRECT_URI`            | `/oidc_callback`                                                |
-| `OIDC_USERINFO_URI`            | `/realms/<REALM_NAME>/protocol/openid-connect/userinfo`         |
-| `OIDC_TOKEN_INTROSPECTION_URI` | `/realms/<REALM_NAME>/protocol/openid-connect/token/introspect` |
-| `OIDC_SERVER_METADATA_URL`     | `/realms/<REALM_NAME>/.well-known/openid-configuration`         |
 | `OIDC_ALLOWED_ROLES`           | `admin`                                                         |
-| `OIDC_SCOPES`                  | `openid,email,profile`                                          |
 
 Keycloak settings:
 
 - Valid redirect URIs: .../oidc_callback
 - Valid post logout redirect URIs .../signout
 
-Some OIDC variables listed here are not used yet.
-
 ## Getting Started
 
+- Ubuntu 22.04
 - Python 3.11.x
 - Docker and Compose Plugin
 - Picamera2 or USB Webcam
@@ -175,9 +178,6 @@ This project is licensed under the [GNU Affero General Public License v3.0 (AGPL
 ### Important Notes
 
 - This project includes the Ultralytics software package, which is licensed under the AGPL-3.0.
-- You are free to use this software for both personal and commercial purposes, but any distribution of this software must comply with AGPL-3.0, including making the source code available to your users.
-- If you deploy this project as a web service, you must provide access to the source code of the entire application.
-- Please ensure compliance with any other third-party software licenses used in this project.
 
 ## Contact
 
@@ -192,12 +192,6 @@ Project Link: [https://github.com/OrhanSalman/IoTCountingApp](https://github.com
 - Not export model if already exists
 - Zoom / Crop Regions for less Points to calculate
 - Persitent Volumes
-
-###### CODE
-
-- Refactor the code to improve readability and maintainability.
-- Perform cleanup of unused variables and functions.
-- Eliminate redundant code to streamline the application.
 
 ---
 

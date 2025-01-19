@@ -618,7 +618,15 @@ export const DeviceProvider = ({ children }) => {
     }, 3000);
 
     return () => clearInterval(intervalId);
-  }, [fetchHealth]); // Kein fetchHealth in den Dependencies
+  }, [fetchHealth]);
+
+  useEffect(() => {
+    const userCheckInterval = setInterval(async () => {
+      await fetchUserData();
+    }, 60000);
+
+    return () => clearInterval(userCheckInterval);
+  }, [fetchUserData]);
 
   return (
     <DeviceContext.Provider

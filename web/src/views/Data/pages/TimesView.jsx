@@ -28,8 +28,8 @@ const TimesView = () => {
 
   return (
     <div>
-      {/*<NotImplemented />*/}
-      <Table columns={columns} dataSource={[]} pagination={false} />
+      <NotImplemented />
+      {/*<Table columns={columns} dataSource={[]} pagination={false} />*/}
     </div>
   );
 };
