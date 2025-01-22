@@ -32,6 +32,9 @@ SECRET_KEY = os.getenv("SECRET_KEY", secrets.token_urlsafe(16))
 ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY", secrets.token_urlsafe(32))
 #print(f"ENCRYPTION_KEY war nicht gesetzt, wurde generiert: {ENCRYPTION_KEY}") if not os.getenv("ENCRYPTION_KEY") else None
 
+from src.env import manage_env_variable
+manage_env_variable("SECRET_KEY", SECRET_KEY)
+manage_env_variable("ENCRYPTION_KEY", ENCRYPTION_KEY)
 
 # Umgebungsvariablen laden
 USE_OIDC = os.getenv("USE_OIDC", "False").lower() == "true"
@@ -117,10 +120,10 @@ ULTRALYTICS_VERSION = os.getenv("ULTRALYTICS_VERSION", "8.3.6")
 def is_package_installed(package_name, version):
     try:
         pkg_resources.require(f"{package_name}=={version}")
-        print(f"Paket '{package_name}' in Version {version} ist bereits installiert.")
+        #print(f"Paket '{package_name}' in Version {version} ist bereits installiert.")
         return True
     except (pkg_resources.DistributionNotFound, pkg_resources.VersionConflict):
-        print(f"Paket '{package_name}' in Version {version} ist nicht installiert.")
+        #print(f"Paket '{package_name}' in Version {version} ist nicht installiert.")
         return False
 
 
@@ -162,7 +165,6 @@ from src.utils.tools import load_config
 data = load_config(CONFIG_PATH)
 DEVICE_ID = data.get("id", None)
 
-#print("DEVICE ID is NONE") if DEVICE_ID is None else None
 
 # Prüfen, ob eine SESSION_COUNTER existiert
 try:

@@ -6,4 +6,10 @@ mongo_data/*
 mongo_config/*
 yolov*
 yolo*
-#.env
+.env
+sample.env
+mongo_settings.enc
+mqtt_settings.enc
+restart.flag
+benchmark.log
+docs
