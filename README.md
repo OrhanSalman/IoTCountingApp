@@ -102,7 +102,8 @@ If **USE_OIDC** is enabled, the following variables must be set:
 | `OIDC_USERINFO_URI`            | `/realms/<REALM_NAME>/protocol/openid-connect/userinfo`         |
 | `OIDC_TOKEN_INTROSPECTION_URI` | `/realms/<REALM_NAME>/protocol/openid-connect/token/introspect` |
 | `OIDC_SERVER_METADATA_URL`     | `/realms/<REALM_NAME>/.well-known/openid-configuration`         |
-| `OIDC_SCOPES`                  | `openid,email,profile,offline_access`                          |
+| `OIDC_SCOPES`                  | `openid,email,profile,offline_access`                           |
+
 
 As for now following variables are unused:
 | **Variable**                   | **Default**                                                     |
