@@ -72,6 +72,7 @@ CONFIG_FOLDER_PATH = os.path.join(HOME_DIR, "data/configs")
 YOLO_PREDICTIONS_PATH = os.path.join(HOME_DIR, "runs/detect")
 BUILD_PATH = os.path.join(HOME_DIR, "build")
 BENCHMARKS_PATH = os.path.join(HOME_DIR, "data/benchmarks")
+DATASET_PATH = os.path.join(HOME_DIR, "datasets")
 
 # Define files
 CONFIG_PATH = os.path.join(HOME_DIR, "data/configs/config.json")
@@ -80,7 +81,7 @@ CAM_SOLUTIONS_PATH = os.path.join(HOME_DIR, "data/configs/cam_solutions.json")
 SYSTEM_SETTINGS_PATH = os.path.join(HOME_DIR, "data/configs/settings.json")
 
 # Ensure the directories exist
-for path in [CONFIG_FOLDER_PATH, IMG_PATH, VID_PATH, LOG_PATH, BENCHMARKS_PATH, YOLO_PREDICTIONS_PATH]:
+for path in [CONFIG_FOLDER_PATH, IMG_PATH, VID_PATH, LOG_PATH, BENCHMARKS_PATH, YOLO_PREDICTIONS_PATH, DATASET_PATH]:
     os.makedirs(path, exist_ok=True)
 
 
