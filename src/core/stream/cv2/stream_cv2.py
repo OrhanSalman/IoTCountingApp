@@ -25,6 +25,7 @@ class CameraStream:
 
         try:
             self.stream = cv2.VideoCapture(source)
+            self.stream.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
             self.stream.set(cv2.CAP_PROP_FRAME_WIDTH, main_resolution[0])
             self.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, main_resolution[1])
             self.stream.set(cv2.CAP_PROP_FPS, fps)
