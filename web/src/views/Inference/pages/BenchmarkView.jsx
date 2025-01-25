@@ -147,7 +147,7 @@ const BenchmarkView = () => {
       dataSource={dataSource}
       pagination={{
         current: currentPage,
-        pageSize: 15,
+        pageSize: 20,
         total: sortedBenchmarks.length * 15,
         onChange: (page) => setCurrentPage(page),
         showSizeChanger: false,
