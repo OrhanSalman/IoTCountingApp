@@ -135,7 +135,6 @@ Keycloak settings:
    - `docker build -f Dockerfile -t iot-app .`
 3. Start the application:
    - `docker compose up iot-app`
-4. Open
 
 ---
 
