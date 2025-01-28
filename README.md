@@ -102,18 +102,18 @@ If **USE_OIDC** is enabled, the following variables must be set:
 | `OIDC_USERINFO_URI`            | `/realms/<REALM_NAME>/protocol/openid-connect/userinfo`         |
 | `OIDC_TOKEN_INTROSPECTION_URI` | `/realms/<REALM_NAME>/protocol/openid-connect/token/introspect` |
 | `OIDC_SERVER_METADATA_URL`     | `/realms/<REALM_NAME>/.well-known/openid-configuration`         |
-| `OIDC_SCOPES`                  | `openid,email,profile`                                          |
+| `OIDC_SCOPES`                  | `openid,email,profile,offline_access`                           |
 
 As for now following variables are unused:
-| **Variable**                   | **Default**                                                     |
+| **Variable** | **Default** |
 | ------------------------------ | --------------------------------------------------------------- |
-| `OIDC_REALM_NAME`              | `<REALM_NAME>`                                                  |
-| `OIDC_CERT_URL`                | `/realms/<REALM_NAME>/protocol/openid-connect/certs`            |
-| `OIDC_TOKEN_URL`               | `/realms/<REALM_NAME>/protocol/openid-connect/token`            |
-| `OIDC_AUTH_URI`                | `/realms/<REALM_NAME>/protocol/openid-connect/auth`             |
-| `OIDC_TOKEN_URI`               | `/realms/<REALM_NAME>/protocol/openid-connect/token`            |
-| `OIDC_REDIRECT_URI`            | `/oidc_callback`                                                |
-| `OIDC_ALLOWED_ROLES`           | `admin`                                                         |
+| `OIDC_REALM_NAME` | `<REALM_NAME>` |
+| `OIDC_CERT_URL` | `/realms/<REALM_NAME>/protocol/openid-connect/certs` |
+| `OIDC_TOKEN_URL` | `/realms/<REALM_NAME>/protocol/openid-connect/token` |
+| `OIDC_AUTH_URI` | `/realms/<REALM_NAME>/protocol/openid-connect/auth` |
+| `OIDC_TOKEN_URI` | `/realms/<REALM_NAME>/protocol/openid-connect/token` |
+| `OIDC_REDIRECT_URI` | `/oidc_callback` |
+| `OIDC_ALLOWED_ROLES` | `admin` |
 
 Keycloak settings:
 
@@ -129,21 +129,35 @@ Keycloak settings:
 
 ### Installation
 
-1. Run the platform script for the corresponding architecture (Raspberry Pi 4 does not support the latest MongoDB version):
-   - `source ./platform.sh`
-2. Start the required services with Docker Compose:
+1. Start the required services with Docker Compose (Optional):
    - `docker compose -f docker-compose-services.yml up -d`
-3. Build the Docker image for the application:
+2. Build the Docker image for the application:
    - `docker build -f Dockerfile -t iot-app .`
-4. Start the application:
+3. Start the application:
    - `docker compose up iot-app`
 
-To reduce the size of the final Docker image, the Ultralytics package is installed only on the first startup of the application. This ensures that only the packages supported by the device are installed.
+---
+
+### First steps
+
+1. Run a benchmark test. Ultralytics installs additional packages.
+2. Run a second benchmark test, as this is the only way to properly activate the additional packages at runtime. This will provide more realistic values for the FPS performance.
+3. Define ROI and tags.
+4. Optional: Test different configurations based on simulation videos.
+5. Start inference and monitor performance on the dashboard.
+6. Integrate MQTT and Mongo client data and enable services.
+
+**If there is a significant discrepancy between the model FPS and system FPS, this may be due to the camera capabilities. In this case, it is advisable to reduce the camera resolution.**
 
 ## CUDA in Docker
 
 1. Uncomment the sections in the Compose file
-2. Additionally you could have to follow these steps: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#installing-with-apt
+2. Take a look at the these compatibility lists and check your Nvidia and CUDA driver versions with `nvidia-smi`
+
+- TF: https://www.tensorflow.org/install/source#gpu
+- CUDA & cuDNN: https://docs.nvidia.com/deeplearning/cudnn/backend/latest/reference/support-matrix.html
+
+3. Additionally follow these steps: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#installing-with-apt
 
 ```bash
 curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
@@ -160,17 +174,6 @@ sudo systemctl restart docker
 
 ---
 
-### First steps
-
-1. Run a benchmark test. Ultralytics installs additional packages.
-2. Run a second benchmark test, as this is the only way to properly activate the additional packages at runtime. This will provide more realistic values for the FPS performance.
-3. Define ROI and tags.
-4. Optional: Test different configurations based on simulation videos.
-5. Start inference and monitor performance on the dashboard.
-6. Integrate MQTT and Mongo client data and enable services.
-
-**If there is a significant discrepancy between the model FPS and system FPS, this may be due to the camera capabilities. In this case, it is advisable to reduce the camera resolution.**
-
 ## License
 
 This project is licensed under the [GNU Affero General Public License v3.0 (AGPL-3.0)](https://www.gnu.org/licenses/agpl-3.0.html).
@@ -179,10 +182,6 @@ This project is licensed under the [GNU Affero General Public License v3.0 (AGPL
 
 - This project includes the Ultralytics software package, which is licensed under the AGPL-3.0.
 
-## Contact
-
-Orhan Gazi Salman - orhan.salman@student.uni-siegen.de
-
 Project Link: [https://github.com/OrhanSalman/IoTCountingApp](https://github.com/OrhanSalman/IoTCountingApp)
 
 ### Possible Adjustments
@@ -190,7 +189,6 @@ Project Link: [https://github.com/OrhanSalman/IoTCountingApp](https://github.com
 - Automatic scaling of ROI points when changing camera resolution
 - TPU compatibility
 - Not export model if already exists
-- Zoom / Crop Regions for less Points to calculate
 - Persitent Volumes
 
 ---

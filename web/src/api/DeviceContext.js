@@ -20,7 +20,6 @@ const initialState = {
   user: {},
   originalData: [],
   isModified: false,
-  isCamModified: false,
   image: null,
   logs: [],
   health: {},
@@ -166,7 +165,7 @@ function reducer(state, action) {
 
     // FETCH USER
     case "FETCH_USER_INIT":
-      return { ...state, loading: true, error: null };
+      return { ...state, loading: false, error: null };
     case "FETCH_USER_SUCCESS":
       return { ...state, loading: false, user: action.payload };
     case "FETCH_USER_FAILURE":
@@ -560,13 +559,13 @@ export const DeviceProvider = ({ children }) => {
           type: "FETCH_USER_FAILURE",
           error: `${response.status} ${response.statusText}`,
         });
-        errorHandler(response.status, response.statusText);
+        //errorHandler(response.status, response.statusText);
       }
     } catch (error) {
       const status = error?.status || "Unbekannt";
       const statusText = error?.statusText || "Unbekannter Fehler";
       dispatch({ type: "FETCH_FAILURE", error: statusText });
-      errorHandler(status, statusText);
+      //errorHandler(status, statusText);
     }
   }, []);
 
@@ -618,7 +617,15 @@ export const DeviceProvider = ({ children }) => {
     }, 3000);
 
     return () => clearInterval(intervalId);
-  }, [fetchHealth]); // Kein fetchHealth in den Dependencies
+  }, [fetchHealth]);
+
+  useEffect(() => {
+    const userCheckInterval = setInterval(async () => {
+      await fetchUserData();
+    }, 60000);
+
+    return () => clearInterval(userCheckInterval);
+  }, [fetchUserData]);
 
   return (
     <DeviceContext.Provider

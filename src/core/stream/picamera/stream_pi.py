@@ -139,11 +139,16 @@ class CameraStream:
                 fourcc = cv2.VideoWriter_fourcc(*'mp4v')
                 out = cv2.VideoWriter(temp_video_path, fourcc, self.fps, size)
 
-                start_time = time.time()
-                while time.time() - start_time < duration:
+                expected_frames = int(duration * self.fps)
+                frame_count = 0
+                
+                #start_time = time.time()
+                #while time.time() - start_time < duration:
+                while frame_count < expected_frames:
                     frame = self.stream.capture_array()
                     if frame is not None:
                         out.write(frame)
+                        frame_count += 1
                     else:
                         error = "Failed to capture frame."
                         logger.error(error)

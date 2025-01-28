@@ -65,6 +65,16 @@ def start_stream(only_simulation=False):
     error = None
 
     if stream is None:
+        solutions = load_config(settings.CAM_SOLUTIONS_PATH)
+        
+        if not solutions or not solutions.get("cv2", False) and not solutions.get("picam2", False):
+            #error = "No camera stream solution available. Go to the settings page and check for a camera stream solution or try a different source."
+            error = "Check for a camera stream solution or try a different source."
+            logger.error(error)
+            return False, error
+
+            #settings.update_camera_solutions()
+        
         data = load_config(settings.CONFIG_PATH)
         youtube = False
         try:
@@ -619,6 +629,7 @@ def send_status():
             'status': benchmark_status
         },
         'video_converter': is_conversion_in_progress(),
+        # TODO: take_video() und take_snapshot() implementieren
         'cpu': cpu,
         'ram': ram,
         'disk': disk,

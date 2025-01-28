@@ -97,6 +97,47 @@ def serve():
     return send_from_directory(app.static_folder, "index.html")
 
 
+def refresh_access_token():
+    try:
+        token_endpoint = f"{settings.OIDC_ISSUER}/protocol/openid-connect/token"
+        refresh_token = session['oidc_auth_token'].get('refresh_token')
+        
+        if not refresh_token:
+            return False
+            
+        data = {
+            'grant_type': 'refresh_token',
+            'client_id': settings.OIDC_CLIENT_ID,
+            'client_secret': settings.OIDC_CLIENT_SECRET,
+            'refresh_token': refresh_token
+        }
+        
+        response = requests.post(token_endpoint, data=data)
+        
+        if response.status_code == 200:
+            new_token = response.json()
+            
+            userinfo_response = requests.get(
+                settings.OIDC_USERINFO_URI,
+                headers={"Authorization": f"Bearer {new_token['access_token']}"}
+            )
+            
+            if userinfo_response.status_code == 200:
+                userinfo = userinfo_response.json()
+                session['oidc_auth_token'] = {
+                    'access_token': new_token['access_token'],
+                    'refresh_token': new_token.get('refresh_token', refresh_token),
+                    'expires_at': time.time() + new_token['expires_in'],
+                    'id_token': new_token.get('id_token'),
+                    **userinfo
+                }
+                return True
+        return False
+    except Exception as e:
+        logger.error(f"Token refresh failed: {str(e)}")
+        return False
+    
+
 @app.before_request
 def require_auth():
     if not settings.USE_OIDC:
@@ -107,6 +148,12 @@ def require_auth():
     if 'oidc_auth_token' in session:
         token = session['oidc_auth_token'].get('access_token')
         expires_at = session['oidc_auth_token'].get('expires_at')
+
+        #if expires_at and time.time() > (expires_at - 30):
+        #    print("Token abgelaufen. Refreshing...")
+        #    if not refresh_access_token():
+        #        session.clear()
+        #        return redirect(url_for('login'))
 
         if token:
             expiration_time = datetime.fromtimestamp(expires_at)
@@ -153,6 +200,10 @@ def userinfo():
     if not settings.USE_OIDC:
         return jsonify({"message": "OIDC not configured."}), 200
     # Abrufen der Benutzerinformationen aus der Session
+    
+    if not refresh_access_token():
+        return jsonify({"error": "Token refresh failed."}), 401
+    
     oidc_session_info = {
         "sub": session['oidc_auth_token'].get("sub"),
         "email_verified": session['oidc_auth_token'].get("email_verified"),
@@ -162,7 +213,9 @@ def userinfo():
         "given_name": session['oidc_auth_token'].get("given_name"),
         "family_name": session['oidc_auth_token'].get("family_name"),
         "email": session['oidc_auth_token'].get("email"),
+        "token_expires_at": session['oidc_auth_token'].get("expires_at"),
     }
+    #print("token_expires_at:", oidc_session_info.get("token_expires_at"))
 
     return json.dumps(oidc_session_info), 200
 
@@ -191,6 +244,7 @@ def auth():
             userinfo = userinfo_response.json()
             session['oidc_auth_token'] = {
                 'access_token': token['access_token'],
+                'refresh_token': token.get('refresh_token'),
                 'expires_at': time.time() + token['expires_in'],
                 'id_token': token['id_token'],
                 **userinfo
@@ -437,6 +491,13 @@ def logs():
                 return jsonify({"message": "Keine Log-Dateien gefunden."}), 200
         else:
             return jsonify({"message": "Keine Log-Dateien gefunden."}), 200
+
+@app.route('/api/solutions', methods=['GET'], endpoint='solutions')
+def solutions():
+    if request.method == 'GET':
+        with open(settings.CAM_SOLUTIONS_PATH, "r") as file:
+            solutions = json.load(file)
+        return jsonify(solutions)
 
 
 @app.route('/api/health', methods=['GET'], endpoint='health')

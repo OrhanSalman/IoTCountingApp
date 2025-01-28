@@ -41,7 +41,7 @@ RUN apt update && apt install -y --no-install-recommends \
 # Build and run application
 # ------------------------------------------------------------------------------------------------
 
-WORKDIR /
+WORKDIR /IoTCountingApp
 
 COPY requirements.txt .
 
@@ -52,7 +52,7 @@ RUN python3 -m venv --system-site-packages /venv && \
   rm -rf /root/.cache/pip
 
 
-COPY . .
+COPY . /IoTCountingApp/
 
 #RUN useradd -m iot-container-user && \
 #  usermod -aG video iot-container-user && \

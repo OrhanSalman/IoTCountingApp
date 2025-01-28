@@ -227,14 +227,14 @@ const BaseDashboardView = () => {
   let alertType = "success";
   if (real_time === 2) {
     alertMessage = "Echtzeit";
-    alertDescription = `Die ausgewählte Konfiguration erfüllt die Echtzeitanforderung mit einer Zielfps von ${cam_fps} Fps.`;
+    alertDescription = `Die ausgewählte Konfiguration erfüllt die Echtzeitanforderung mit einer Ziel-FPS von ${cam_fps}.`;
   } else if (real_time === 1) {
     alertMessage = "Warnung";
-    alertDescription = `Die ausgewählte Konfiguration erfüllt die Zielfps von ${cam_fps} Fps nicht vollständig.`;
+    alertDescription = `Die ausgewählte Konfiguration erfüllt die Ziel-FPS von ${cam_fps} nicht vollständig.`;
     alertType = "warning";
   } else if (real_time === 0) {
     alertMessage = "Achtung";
-    alertDescription = `Die ausgewählte Konfiguration ist für die Echtzeitverarbeitung von Zielfps ${cam_fps} Fps nicht geeignet.`;
+    alertDescription = `Die ausgewählte Konfiguration ist für die Echtzeitverarbeitung von ${cam_fps} FPS nicht geeignet.`;
     alertType = "error";
   }
 

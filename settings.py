@@ -6,6 +6,7 @@ import sys
 import threading
 import pkg_resources
 from dotenv import load_dotenv
+from src.utils.solutions import get_nvidia_version, get_cuda_version, get_cudnn_version, get_tensorflow_version, get_torch_version, get_opencv_version, get_ultralytics_version
 
 load_dotenv(override=True)
 
@@ -32,6 +33,9 @@ SECRET_KEY = os.getenv("SECRET_KEY", secrets.token_urlsafe(16))
 ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY", secrets.token_urlsafe(32))
 #print(f"ENCRYPTION_KEY war nicht gesetzt, wurde generiert: {ENCRYPTION_KEY}") if not os.getenv("ENCRYPTION_KEY") else None
 
+from src.env import manage_env_variable
+manage_env_variable("SECRET_KEY", SECRET_KEY)
+manage_env_variable("ENCRYPTION_KEY", ENCRYPTION_KEY)
 
 # Umgebungsvariablen laden
 USE_OIDC = os.getenv("USE_OIDC", "False").lower() == "true"
@@ -69,6 +73,7 @@ CONFIG_FOLDER_PATH = os.path.join(HOME_DIR, "data/configs")
 YOLO_PREDICTIONS_PATH = os.path.join(HOME_DIR, "runs/detect")
 BUILD_PATH = os.path.join(HOME_DIR, "build")
 BENCHMARKS_PATH = os.path.join(HOME_DIR, "data/benchmarks")
+DATASET_PATH = os.path.join(HOME_DIR, "datasets")
 
 # Define files
 CONFIG_PATH = os.path.join(HOME_DIR, "data/configs/config.json")
@@ -77,7 +82,7 @@ CAM_SOLUTIONS_PATH = os.path.join(HOME_DIR, "data/configs/cam_solutions.json")
 SYSTEM_SETTINGS_PATH = os.path.join(HOME_DIR, "data/configs/settings.json")
 
 # Ensure the directories exist
-for path in [CONFIG_FOLDER_PATH, IMG_PATH, VID_PATH, LOG_PATH, BENCHMARKS_PATH, YOLO_PREDICTIONS_PATH]:
+for path in [CONFIG_FOLDER_PATH, IMG_PATH, VID_PATH, LOG_PATH, BENCHMARKS_PATH, YOLO_PREDICTIONS_PATH, DATASET_PATH]:
     os.makedirs(path, exist_ok=True)
 
 
@@ -117,10 +122,10 @@ ULTRALYTICS_VERSION = os.getenv("ULTRALYTICS_VERSION", "8.3.6")
 def is_package_installed(package_name, version):
     try:
         pkg_resources.require(f"{package_name}=={version}")
-        print(f"Paket '{package_name}' in Version {version} ist bereits installiert.")
+        #print(f"Paket '{package_name}' in Version {version} ist bereits installiert.")
         return True
     except (pkg_resources.DistributionNotFound, pkg_resources.VersionConflict):
-        print(f"Paket '{package_name}' in Version {version} ist nicht installiert.")
+        #print(f"Paket '{package_name}' in Version {version} ist nicht installiert.")
         return False
 
 
@@ -162,7 +167,6 @@ from src.utils.tools import load_config
 data = load_config(CONFIG_PATH)
 DEVICE_ID = data.get("id", None)
 
-#print("DEVICE ID is NONE") if DEVICE_ID is None else None
 
 # Prüfen, ob eine SESSION_COUNTER existiert
 try:
@@ -180,6 +184,17 @@ with open(SYSTEM_SETTINGS_PATH, "r") as file:
     AUTO_START_INFERENCE = system_settings.get("auto_start_inference", False)
     AUTO_START_MQTT_CLIENT = system_settings.get("auto_start_mqtt_client", False)
     AUTO_START_MONGO_CLIENT = system_settings.get("auto_start_mongo_client", False)
+
+
+
+
+NVIDIA_VERSION = get_nvidia_version()
+CUDA_VERSION = get_cuda_version()
+CUDNN_VERSION = get_cudnn_version()
+TF_VERSION = get_tensorflow_version()
+TORCH_VERSION = get_torch_version()
+OPENCV_VERSION = get_opencv_version()
+ULTRALYTICS_VERSION = get_ultralytics_version()
 
 
 settings_loaded_event.set()

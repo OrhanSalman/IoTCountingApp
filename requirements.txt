@@ -1,4 +1,3 @@
-numpy
 h5py==3.12.1
 python-dotenv==1.0.1
 opencv-python-headless==4.10.0.84
@@ -26,3 +25,8 @@ psutil==6.0.0
 gputil==1.4.0
 
 #PyJWT==2.8.0
+
+#https://github.com/ultralytics/ultralytics/issues/14235
+tensorflow==2.16.1
+tf-keras==2.16.0
+onnx2tf==1.22.3

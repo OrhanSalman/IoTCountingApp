@@ -25,6 +25,7 @@ class CameraStream:
 
         try:
             self.stream = cv2.VideoCapture(source)
+            self.stream.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
             self.stream.set(cv2.CAP_PROP_FRAME_WIDTH, main_resolution[0])
             self.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, main_resolution[1])
             self.stream.set(cv2.CAP_PROP_FPS, fps)
@@ -128,13 +129,18 @@ class CameraStream:
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
         out = cv2.VideoWriter(temp_video_path, fourcc, self.fps, size)
 
-        start_time = time.time()
-        while time.time() - start_time < duration:
+        expected_frames = int(duration * self.fps)
+        frame_count = 0
+        
+        #start_time = time.time()
+        #while time.time() - start_time < duration:
+        while frame_count < expected_frames:
             ret, frame = self.stream.read()
             if not ret:
                 logger.error("Could not read frame from camera.")
                 return False
             out.write(frame)
+            frame_count += 1
 
         out.release()
         #logger.info(f"Video saved successfully to {temp_video_path}")
