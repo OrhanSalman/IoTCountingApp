@@ -20,7 +20,7 @@ while true; do
             # Sende SIGTERM an den Server-Prozess und warte auf die Beendigung
             kill -15 $SERVER_PID
             echo "SIGTERM an Server gesendet (PID: $SERVER_PID)." >> $LOG_FILE
-            sleep 5  # Warte auf sauberen Shutdown
+            sleep 5
 
             # Falls der Prozess noch läuft, sende SIGKILL als letzten Ausweg
             if ps -p $SERVER_PID > /dev/null; then
@@ -28,7 +28,6 @@ while true; do
                 kill -9 $SERVER_PID
             fi
 
-            # Starte den Server neu und leite Ausgabe in main.log
             echo "Server wird neu gestartet..." >> $LOG_FILE
             python app.py
             NEW_SERVER_PID=$!

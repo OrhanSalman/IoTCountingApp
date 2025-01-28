@@ -20,7 +20,6 @@ const initialState = {
   user: {},
   originalData: [],
   isModified: false,
-  isCamModified: false,
   image: null,
   logs: [],
   health: {},

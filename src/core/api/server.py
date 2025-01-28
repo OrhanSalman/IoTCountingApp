@@ -492,6 +492,13 @@ def logs():
         else:
             return jsonify({"message": "Keine Log-Dateien gefunden."}), 200
 
+@app.route('/api/solutions', methods=['GET'], endpoint='solutions')
+def solutions():
+    if request.method == 'GET':
+        with open(settings.CAM_SOLUTIONS_PATH, "r") as file:
+            solutions = json.load(file)
+        return jsonify(solutions)
+
 
 @app.route('/api/health', methods=['GET'], endpoint='health')
 def health():

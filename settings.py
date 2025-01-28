@@ -6,6 +6,7 @@ import sys
 import threading
 import pkg_resources
 from dotenv import load_dotenv
+from src.utils.solutions import get_nvidia_version, get_cuda_version, get_cudnn_version, get_tensorflow_version, get_torch_version, get_opencv_version, get_ultralytics_version
 
 load_dotenv(override=True)
 
@@ -183,6 +184,17 @@ with open(SYSTEM_SETTINGS_PATH, "r") as file:
     AUTO_START_INFERENCE = system_settings.get("auto_start_inference", False)
     AUTO_START_MQTT_CLIENT = system_settings.get("auto_start_mqtt_client", False)
     AUTO_START_MONGO_CLIENT = system_settings.get("auto_start_mongo_client", False)
+
+
+
+
+NVIDIA_VERSION = get_nvidia_version()
+CUDA_VERSION = get_cuda_version()
+CUDNN_VERSION = get_cudnn_version()
+TF_VERSION = get_tensorflow_version()
+TORCH_VERSION = get_torch_version()
+OPENCV_VERSION = get_opencv_version()
+ULTRALYTICS_VERSION = get_ultralytics_version()
 
 
 settings_loaded_event.set()
